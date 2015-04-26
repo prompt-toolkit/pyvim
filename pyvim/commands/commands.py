@@ -137,6 +137,7 @@ def _(editor):
     editor.window_arrangement.close_window()
 
 
+@file_cmd('sp')
 @file_cmd('split')
 def _(editor, filename):
     """
@@ -145,6 +146,7 @@ def _(editor, filename):
     editor.window_arrangement.hsplit(filename or None)
 
 
+@file_cmd('vsp')
 @file_cmd('vsplit')
 def _(editor, filename):
     """
