@@ -1,0 +1,19 @@
+CHANGELOG
+=========
+
+
+0.0.1: 2015-04-26
+-----------------
+
+First public release:
+- Working layouts: horizontal/vertical splits, tab pages, etc...
+- Many commands + key bindings.
+- Jedi and Pyflakes integration.
+- Reading and writing of files.
+- Many other stuff.
+
+
+2015-01-25
+----------
+
+First working proof of concept.

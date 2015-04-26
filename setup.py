@@ -21,9 +21,9 @@ setup(
     long_description=long_description,
     packages=find_packages('.'),
     install_requires = [
-        'prompt-toolkit',
-        'ptpython',  # For the Python completion (with Jedi.)
-        'pyflakes',  # For Python error reporting.
+        'prompt-toolkit==0.34',
+        'ptpython==0.8',  # For the Python completion (with Jedi.)
+        'pyflakes',       # For Python error reporting.
     ],
     entry_points={
         'console_scripts': [
