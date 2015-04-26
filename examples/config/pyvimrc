@@ -30,10 +30,10 @@ def configure(editor):
     editor.tabstop = 4  # (:set tabstop=4)
 
     # Show tabs and trailing whitespace. (:set list)
-    self.display_unprintable_characters = True
+    editor.display_unprintable_characters = True
 
     # Use Jedi for autocompletion of Python files. (:set jedi)
-    self.enable_jedi = True
+    editor.enable_jedi = True
 
     # Apply colorscheme. (:colorscheme emacs)
     editor.use_colorscheme('emacs')
