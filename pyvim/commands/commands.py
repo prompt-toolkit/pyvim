@@ -197,14 +197,26 @@ def _(editor):
 
 @_cmd('b')
 @_cmd('buffer')
-def _(editor, variables):
+def _buffer(editor, variables, force=False):
     """
     Go to one of the open buffers.
     """
+    eb = editor.window_arrangement.active_editor_buffer
+
     buffer_name = variables.get('buffer_name')
     if buffer_name:
-        editor.window_arrangement.go_to_buffer(buffer_name)
+        if not force and eb.has_unsaved_changes:
+            editor.show_message('No write since last change (add ! to override)')
+        else:
+            editor.window_arrangement.go_to_buffer(buffer_name)
 
+@_cmd('b!')
+@_cmd('buffer!')
+def _(editor, variables):
+    """
+    Force go to one of the open buffers.
+    """
+    _buffer(editor, variables, force=True)
 
 @cmd('bw')
 def _(editor):
