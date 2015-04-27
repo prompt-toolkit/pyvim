@@ -173,7 +173,7 @@ A
 Thanks
 ------
 
-- To Vi Improved, by Bram Moolenaar. For the insparation.
+- To Vi Improved, by Bram Moolenaar. For the inspiration.
 - To Jedi, pyflakes and the docopt Python libraries.
 - To the Python wcwidth port of Jeff Quast for support of double width characters.
 - To Guido van Rossum, for creating Python.
