@@ -172,6 +172,22 @@ def create_key_bindings(editor):
         editor.window_arrangement.cycle_focus()
         editor.sync_with_prompt_toolkit()
 
+    @handle(Keys.ControlW, 'n', filter=in_navigation_mode)
+    def _(event):
+        """
+        Split horizontally.
+        """
+        editor.window_arrangement.hsplit(None)
+        editor.sync_with_prompt_toolkit()
+
+    @handle(Keys.ControlW, 'v', filter=in_navigation_mode)
+    def _(event):
+        """
+        Split vertically.
+        """
+        editor.window_arrangement.vsplit(None)
+        editor.sync_with_prompt_toolkit()
+
     @handle('g', 't', filter=in_navigation_mode)
     def focus_next_tab(event):
         editor.window_arrangement.go_to_next_tab()
