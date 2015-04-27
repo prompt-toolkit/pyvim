@@ -77,9 +77,9 @@ Other colorschemes:
 
 .. image :: https://github.com/jonathanslenders/pyvim/raw/master/docs/images/colorschemes.png
 
-Chinese input (double width characters):
+Chinese and Japanese input (double width characters):
 
-.. image :: https://github.com/jonathanslenders/pyvim/raw/master/docs/images/chinese.png
+.. image :: https://raw.githubusercontent.com/jonathanslenders/pyvim/master/docs/images/cjk.png?v2
 
 
 Configuring pyvim
