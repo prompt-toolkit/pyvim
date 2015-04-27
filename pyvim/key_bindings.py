@@ -85,6 +85,50 @@ def create_key_bindings(editor):
             b.cursor_position = b.document.translate_row_col_to_index(new_document_line, 0)
             w.vertical_scroll = w.render_info.input_line_to_screen_line(new_document_line)
 
+    @handle(Keys.PageDown)
+    def _(event):
+        """
+        Scroll page down. (Prefer the cursor at the top of the page, after scrolling.)
+        """
+        w = find_window_for_buffer_name(event.cli.layout, event.cli.current_buffer_name)
+        b = event.cli.current_buffer
+
+        if w and w.render_info:
+            # Scroll down one page.
+            w.vertical_scroll += w.render_info.rendered_height
+
+            # Put cursor at the top of the visible region.
+            try:
+                new_document_line = w.render_info.screen_line_to_input_line[w.vertical_scroll]
+            except KeyError:
+                new_document_line = b.document.line_count - 1
+
+            b.cursor_position = b.document.translate_row_col_to_index(new_document_line, 0)
+            b.cursor_position += b.document.get_start_of_line_position(after_whitespace=True)
+
+    @handle(Keys.PageUp)
+    def _(event):
+        """
+        Scroll page up. (Prefer the cursor at the bottom of the page, after scrolling.)
+        """
+        w = find_window_for_buffer_name(event.cli.layout, event.cli.current_buffer_name)
+        b = event.cli.current_buffer
+
+        if w and w.render_info:
+            # Scroll down one page.
+            w.vertical_scroll = max(0, w.vertical_scroll - w.render_info.rendered_height)
+
+            # Put cursor at the bottom of the visible region.
+            try:
+                new_document_line = w.render_info.screen_line_to_input_line[
+                    w.vertical_scroll + w.render_info.rendered_height - 1]
+            except KeyError:
+                new_document_line = 0
+
+            b.cursor_position = min(b.cursor_position,
+                                    b.document.translate_row_col_to_index(new_document_line, 0))
+            b.cursor_position += b.document.get_start_of_line_position(after_whitespace=True)
+
     @handle(Keys.ControlR, filter=in_navigation_mode, save_before=False)
     def _(event):
         """
