@@ -156,6 +156,15 @@ REPL.)
 Above all, it is really fun to create an editor.
 
 
+Alternatives
+------------
+
+Certainly have a look at the alternatives:
+
+- Kaa: https://github.com/kaaedit/kaa by @atsuoishimoto
+- Vai: https://github.com/stefanoborini/vai by @stefanoborini
+
+
 Q & A:
 ------
 
