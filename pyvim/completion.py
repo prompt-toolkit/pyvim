@@ -43,10 +43,10 @@ class DocumentCompleter(Completer):
 
     def get_completions(self, document, complete_event):
         editor = self._editor_ref()
-        filename = self._editor_buffer_ref().filename or '.txt'
+        location = self._editor_buffer_ref().location or '.txt'
 
         # Select completer.
-        if filename.endswith('.py') and editor.enable_jedi:
+        if location.endswith('.py') and editor.enable_jedi:
             completer = PythonCompleter(lambda: globals(), lambda: {})
         else:
             completer = DocumentWordsCompleter()

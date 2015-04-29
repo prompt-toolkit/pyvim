@@ -7,8 +7,8 @@ from pyvim.completion import DocumentCompleter
 
 from six import string_types
 
-import codecs
 import os
+import weakref
 
 __all__ = (
     'EditorBuffer',
@@ -17,33 +17,32 @@ __all__ = (
 
 class EditorBuffer(object):
     """
-    Wrapper aronud a `prompt-toolkit` buffer.
+    Wrapper around a `prompt-toolkit` buffer.
 
     A 'prompt-toolkit' `Buffer` doesn't know anything about files, changes,
     etc... This wrapper contains the necessary data for the editor.
     """
-    def __init__(self, editor, buffer_name, filename=None, text=None):
+    def __init__(self, editor, buffer_name, location=None, text=None):
         assert isinstance(buffer_name, string_types)
-        assert filename is None or isinstance(filename, string_types)
+        assert location is None or isinstance(location, string_types)
         assert text is None or isinstance(text, string_types)
-        assert not (filename and text)
+        assert not (location and text)
 
+        self._editor_ref = weakref.ref(editor)
         self.buffer_name = buffer_name
-        self.filename = filename
+        self.location = location
         self.encoding = 'utf-8'
-        self.is_directory = False
+        
+        #: is_new: True when this file does not yet exist in the storage.
+        self.is_new = True
 
-        # Create buffer
-        if filename:
-            self.is_directory, text = self._read(filename)
+        # Read text.
+        if location:
+            text = self._read(location)
         else:
             text = text or ''
 
         self._file_content = text
-
-        # Append slash to directory names.
-        if self.is_directory:
-            self.filename += '/'
 
         # Create Buffer.
         self.buffer = Buffer(
@@ -56,103 +55,80 @@ class EditorBuffer(object):
         self.report_errors = []
 
     @property
+    def editor(self):
+        """ Back reference to the Editor. """
+        return self._editor_ref()
+
+    @property
     def has_unsaved_changes(self):
         """
         True when some changes are not yet written to file.
         """
         return self._file_content != self.buffer.text
 
-    @property
-    def is_new_file(self):
-        """ True when this file does not exist on the disk yet. """
-        return self.filename is None
-
-    def _read(self, filename):
+    def _read(self, location):
         """
-        Read file content.
+        Read file I/O backend.
         """
-        # Expand tilde.
-        filename = os.path.expanduser(filename)
+        for io in self.editor.io_backends:
+            if io.can_open_location(location):
+                # Found an I/O backend.
+                exists = io.exists(location)
+                if exists in (True, NotImplemented):
+                    # File could exist. Read it.
+                    self.is_new = False
+                    try:
+                        text, self.encoding = io.read(location)
+                    except Exception as e:
+                        self.editor.show_message('Cannot read %r: %r' % (location, e))
+                        return ''
+                    else:
+                        return text
+                else:
+                    # File doesn't exist.
+                    self.is_new = True
+                    return ''
 
-        if os.path.isfile(filename):
-            # Try to open this file, using different encodings.
-            encodings = ['utf-8', 'latin-1']
-            for e in encodings:
-                try:
-                    with codecs.open(filename, 'r', e) as f:
-                        self.encoding = e
-                        return False, f.read()
-                except UnicodeDecodeError:
-                    pass  # Try next codec.
+        self.editor.show_message('Cannot read: %r' % location)
+        return ''
 
-            # Unable to open. TODO: make read only.
-            self.encoding = None
-            return False, 'Unable to open file...'
+    def write(self, location=None):
+        """
+        Write file to I/O backend.
+        """
+        # Take location and expand tilde.
+        if location is not None:
+            self.location = location
+        assert self.location
 
-        # Handle directory listing.
-        elif os.path.isdir(filename):
-            return True, self._create_directory_listing(filename)
-
+        # Find I/O backend that handles this location.
+        for io in self.editor.io_backends:
+            if io.can_open_location(self.location):
+                break
         else:
-            return False, ''
-
-    def write(self, filename=None):
-        """
-        Save this file to disk.
-        """
-        # Take filename and expand tilde.
-        if filename is not None:
-            self.filename = filename
-        assert self.filename
-        filename = os.path.expanduser(self.filename)
+            self.editor.show_message('Unknown location: %r' % location)
 
         # Write it.
-        with codecs.open(filename, 'w', self.encoding) as f:
-            f.write(self.buffer.text)
-
-        self._file_content = self.buffer.text
-
-    @staticmethod
-    def _create_directory_listing(directory):
-        """
-        Create a textual listing of the directory content.
-        """
-        # Read content.
-        content = sorted(os.listdir(directory))
-        directories = []
-        files = []
-
-        for f in content:
-            if os.path.isdir(os.path.join(directory, f)):
-                directories.append(f)
-            else:
-                files.append(f)
-
-        # Construct output.
-        result = []
-        result.append('" ==================================\n')
-        result.append('" Directory Listing\n')
-        result.append('"    %s\n' % os.path.abspath(directory))
-        result.append('" ==================================\n')
-
-        for d in directories:
-            result.append('%s/\n' % d)
-
-        for f in files:
-            result.append('%s\n' % f)
-
-        return ''.join(result)
+        try:
+            io.write(self.location, self.buffer.text, self.encoding)
+            self.is_new = False
+        except Exception as e:
+            # E.g. "No such file or directory."
+            self.editor.show_message('%s' % e)
+        else:
+            # When the save succeeds: update: _file_content.
+            self._file_content = self.buffer.text
 
     def get_display_name(self, short=False):
         """
         Return name as displayed.
         """
-        if self.filename is None:
+        if self.location is None:
             return '[New file]'
         elif short:
-            return os.path.basename(self.filename)
+            return os.path.basename(self.location)
         else:
-            return self.filename
+            return self.location
 
     def __repr__(self):
         return '%s(buffer_name=%r, buffer=%r)' % (

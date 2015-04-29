@@ -37,7 +37,7 @@ class TabsControl(TokenListControl):
     open tab.
     """
     def __init__(self, editor):
-        def filename_for_tab(tab):
+        def location_for_tab(tab):
             return tab.active_window.editor_buffer.get_display_name(short=True)
 
         def get_tokens(cli):
@@ -47,7 +47,7 @@ class TabsControl(TokenListControl):
             append = result.append
 
             for i, tab in enumerate(editor.window_arrangement.tab_pages):
-                caption = filename_for_tab(tab)
+                caption = location_for_tab(tab)
                 if tab.has_unsaved_changes:
                     caption = ' + ' + caption
 
@@ -99,7 +99,7 @@ class WelcomeMessageWindow(Window):
             # Only show when there is only one empty buffer, but once the
             # welcome message has been hidden, don't show it again.
             result = (len(buffers) == 1 and buffers[0].buffer.text == '' and
-                      buffers[0].filename is None and not once_hidden[0])
+                      buffers[0].location is None and not once_hidden[0])
             if not result:
                 once_hidden[0] = True
             return result
@@ -129,14 +129,14 @@ class BufferListOverlay(Window):
     def __init__(self, editor):
         token = Token.BufferList
 
-        def highlight_filename(filename, search_string, default_token):
+        def highlight_location(location, search_string, default_token):
             """
             Return a tokenlist with the `search_string` highlighted.
             """
-            result = [(default_token, c) for c in filename]
+            result = [(default_token, c) for c in location]
 
             # Replace token of matching positions.
-            for m in re.finditer(re.escape(search_string), filename):
+            for m in re.finditer(re.escape(search_string), location):
                 for i in range(m.start(), m.end()):
                     result[i] = (token.SearchMatch, result[i][1])
             return result
@@ -154,8 +154,8 @@ class BufferListOverlay(Window):
                     """
                     True when we should show this entry.
                     """
-                    # When the input appears in the filename.
-                    if input_params[1] in (info.editor_buffer.filename or ''):
+                    # When the input appears in the location.
+                    if input_params[1] in (info.editor_buffer.location or ''):
                         return True
 
                     # When the input matches this buffer his index number.
@@ -165,9 +165,9 @@ class BufferListOverlay(Window):
                     # When this entry is part of the current completions list.
                     b = cli.buffers[COMMAND_BUFFER]
 
-                    if b.complete_state and any(info.editor_buffer.filename in c.display
+                    if b.complete_state and any(info.editor_buffer.location in c.display
                                                 for c in b.complete_state.current_completions
-                                                if info.editor_buffer.filename is not None):
+                                                if info.editor_buffer.location is not None):
                         return True
 
                     return False
@@ -184,8 +184,8 @@ class BufferListOverlay(Window):
                 result.append((token, '  '))
                 result.append((token.Title, 'Open buffers\n'))
 
-                # Get length of longest filename
-                max_filename_len = max(len(info.editor_buffer.get_display_name()) for info in buffer_infos)
+                # Get length of longest location
+                max_location_len = max(len(info.editor_buffer.get_display_name()) for info in buffer_infos)
 
                 # Show info for each buffer.
                 for info in buffer_infos:
@@ -202,9 +202,9 @@ class BufferListOverlay(Window):
                         (t, '%s ' % char2),
                         (t, '%s ' % char3),
                     ])
-                    result.extend(highlight_filename(eb.get_display_name(), search_string, t))
+                    result.extend(highlight_location(eb.get_display_name(), search_string, t))
                     result.extend([
-                        (t, ' ' * (max_filename_len - len(eb.get_display_name()))),
+                        (t, ' ' * (max_location_len - len(eb.get_display_name()))),
                         (t.Lineno, '  line %i' % (eb.buffer.document.cursor_position_row + 1)),
                         (t, ' \n')
                     ])
@@ -283,8 +283,8 @@ class WindowStatusBar(TokenListToolbar):
 
             return [
                 (Token.Toolbar, ' '),
-                (Token.Toolbar, editor_buffer.filename or ''),
-                (Token.Toolbar, ' [New File]' if editor_buffer.is_new_file else ''),
+                (Token.Toolbar, editor_buffer.location or ''),
+                (Token.Toolbar, ' [New File]' if editor_buffer.is_new else ''),
                 (Token.Toolbar, '*' if editor_buffer.has_unsaved_changes else ''),
                 (Token.Toolbar, ' '),
                 (Token.Toolbar, mode()),
@@ -453,9 +453,8 @@ class EditorLayout(object):
 
     def _create_buffer_control(self, editor_buffer):
         """
-        Create a new BufferControl for a given filename.
+        Create a new BufferControl for a given location.
         """
-        filename = editor_buffer.filename
         buffer_name = editor_buffer.buffer_name
 
         @Condition

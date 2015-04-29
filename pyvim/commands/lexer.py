@@ -17,7 +17,7 @@ def create_command_lexer():
     """
     return GrammarLexer(COMMAND_GRAMMAR, tokens={
         'command': Token.CommandLine.Command,
-        'filename': Token.CommandLine.Filename,
+        'location': Token.CommandLine.Location,
     }, lexers={
         'shell_command': BashLexer,
     })

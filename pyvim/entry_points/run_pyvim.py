@@ -2,7 +2,7 @@
 """
 pyvim: Pure Python Vim clone.
 Usage:
-    pyvim [-p] [-o] [-O] [-u <pyvimrc>] [<filename>...]
+    pyvim [-p] [-o] [-O] [-u <pyvimrc>] [<location>...]
 
 Options:
     -p           : Open files in tab pages.
@@ -24,7 +24,7 @@ __all__ = (
 
 def run():
     a = docopt.docopt(__doc__)
-    filenames = a['<filename>']
+    locations = a['<location>']
     in_tab_pages = a['-p']
     hsplit = a['-o']
     vsplit = a['-O']
@@ -43,7 +43,7 @@ def run():
             run_rc_file(editor, default_pyvimrc)
 
     # Load files and run.
-    editor.load_initial_files(filenames, in_tab_pages=in_tab_pages,
+    editor.load_initial_files(locations, in_tab_pages=in_tab_pages,
                               hsplit=hsplit, vsplit=vsplit)
     editor.run()
 

@@ -9,7 +9,7 @@ __all__ = (
 
 
 COMMANDS_TO_HANDLERS = {}  # Global mapping Vi commands to their handler.
-COMMANDS_TAKING_FILENAMES = set()  # Name of commands that accept files.
+COMMANDS_TAKING_LOCATIONS = set()  # Name of commands that accept locations.
 SET_COMMANDS = {}  # Mapping ':set'-commands to their handler.
 SET_COMMANDS_TAKING_VALUE = set()
 
@@ -29,8 +29,8 @@ def get_commands():
     return COMMANDS_TO_HANDLERS.keys()
 
 
-def get_commands_taking_filenames():
-    return COMMANDS_TAKING_FILENAMES
+def get_commands_taking_locations():
+    return COMMANDS_TAKING_LOCATIONS
 
 
 # Decorators
@@ -45,18 +45,18 @@ def _cmd(name):
     return decorator
 
 
-def file_cmd(name):
+def location_cmd(name):
     """
-    Decorator that registers a command that takes a filename as (optional)
+    Decorator that registers a command that takes a location as (optional)
     parameter.
     """
-    COMMANDS_TAKING_FILENAMES.add(name)
+    COMMANDS_TAKING_LOCATIONS.add(name)
 
     def decorator(func):
         @_cmd(name)
         def command_wrapper(editor, variables):
-            filename = variables.get('filename')
-            func(editor, filename)
+            location = variables.get('location')
+            func(editor, location)
         return func
     return decorator
 
@@ -137,22 +137,22 @@ def _(editor):
     editor.window_arrangement.close_window()
 
 
-@file_cmd('sp')
-@file_cmd('split')
-def _(editor, filename):
+@location_cmd('sp')
+@location_cmd('split')
+def _(editor, location):
     """
     Split window horizontally.
     """
-    editor.window_arrangement.hsplit(filename or None)
+    editor.window_arrangement.hsplit(location or None)
 
 
-@file_cmd('vsp')
-@file_cmd('vsplit')
-def _(editor, filename):
+@location_cmd('vsp')
+@location_cmd('vsplit')
+def _(editor, location):
     """
     Split window vertically.
     """
-    editor.window_arrangement.vsplit(filename or None)
+    editor.window_arrangement.vsplit(location or None)
 
 
 @cmd('new')
@@ -171,12 +171,12 @@ def _(editor):
     editor.window_arrangement.vsplit(new=True)
 
 
-@file_cmd('badd')
-def _(editor, filename):
+@location_cmd('badd')
+def _(editor, location):
     """
     Add a new buffer.
     """
-    editor.window_arrangement.open_buffer(filename)
+    editor.window_arrangement.open_buffer(location)
 
 
 @cmd('buffers')
@@ -190,7 +190,7 @@ def _(editor):
             char = '%' if info.is_active else ''
             eb = info.editor_buffer
             print(' %3i %-2s %-20s  line %i' % (
-                  info.index, char, eb.filename, (eb.buffer.document.cursor_position_row + 1)))
+                  info.index, char, eb.location, (eb.buffer.document.cursor_position_row + 1)))
         (input() if six.PY3 else raw_input)('\nPress ENTER to continue...')
     editor.cli.run_in_terminal(handler)
 
@@ -227,13 +227,13 @@ def _(editor):
     editor.window_arrangement.close_buffer()
 
 
-@file_cmd('e')
-@file_cmd('edit')
-def _(editor, filename):
+@location_cmd('e')
+@location_cmd('edit')
+def _(editor, location):
     """
     Edit new buffer.
     """
-    editor.window_arrangement.open_buffer(filename, show_in_current_window=True)
+    editor.window_arrangement.open_buffer(location, show_in_current_window=True)
 
 
 @cmd('q')
@@ -276,37 +276,37 @@ def _(editor):
     quit(editor, all_=True, force=True)
 
 
-@file_cmd('w')
-@file_cmd('write')
-def write(editor, filename, overwrite=False):
+@location_cmd('w')
+@location_cmd('write')
+def write(editor, location, overwrite=False):
     """
     Write file.
     """
-    if filename and not overwrite and os.path.exists(filename):
+    if location and not overwrite and os.path.exists(location):
         editor.show_message('File exists (add ! to overriwe)')
     else:
         eb = editor.window_arrangement.active_editor_buffer
-        if filename is None and eb.filename is None:
+        if location is None and eb.location is None:
             editor.show_message('No file name')
         else:
-            eb.write(filename)
+            eb.write(location)
 
 
-@file_cmd('w!')
-@file_cmd('write!')
-def _(editor, filename):
+@location_cmd('w!')
+@location_cmd('write!')
+def _(editor, location):
     """
     Write (and overwrite) file.
     """
-    write(editor, filename, overwrite=True)
+    write(editor, location, overwrite=True)
 
 
-@file_cmd('wq')
-def _(editor, filename):
+@location_cmd('wq')
+def _(editor, location):
     """
     Write file and quit.
     """
-    write(editor, filename)
+    write(editor, location)
     editor.cli.set_return_value('')
 
 
@@ -316,19 +316,19 @@ def _(editor):
     Write current buffer and quit all.
     """
     eb = editor.window_arrangement.active_editor_buffer
-    if eb.filename is None:
+    if eb.location is None:
         editor.show_message('No file name for buffer')
     else:
         eb.write()
         quit(editor, all_=True, force=False)
 
 
-@file_cmd('wq!')
-def _(editor, filename):
+@location_cmd('wq!')
+def _(editor, location):
     """
     Write file (and overwrite) and quit.
     """
-    write(editor, filename, overwrite=True)
+    write(editor, location, overwrite=True)
     editor.cli.set_return_value('')
 
 
@@ -340,12 +340,12 @@ def _(editor):
     editor.show_help()
 
 
-@file_cmd('tabnew')
-def _(editor, filename):
+@location_cmd('tabnew')
+def _(editor, location):
     """
     Create new tab page.
     """
-    editor.window_arrangement.create_tab(filename or None)
+    editor.window_arrangement.create_tab(location or None)
 
 
 @cmd('tabclose')

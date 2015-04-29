@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from prompt_toolkit.contrib.regular_languages.compiler import compile
 
-from .commands import get_commands_taking_filenames
+from .commands import get_commands_taking_locations
 
 
 #: The compiled grammar for the Vim command line.
@@ -11,8 +11,8 @@ COMMAND_GRAMMAR = compile(r"""
     :*
     \s*
     (
-        # Commands accepting a filename.
-        (?P<command>%(commands_taking_filenames)s)  \s+   (?P<filename>[^\s]+)   |
+        # Commands accepting a location.
+        (?P<command>%(commands_taking_locations)s)  \s+   (?P<location>[^\s]+)   |
 
         # Commands accepting a buffer.
         (?P<command>b|buffer)  \s+   (?P<buffer_name>[^\s]+)    |
@@ -41,5 +41,5 @@ COMMAND_GRAMMAR = compile(r"""
     # Allow trailing space.
     \s*
 """ % {
-    'commands_taking_filenames': '|'.join(get_commands_taking_filenames()),
+    'commands_taking_locations': '|'.join(get_commands_taking_locations()),
 })

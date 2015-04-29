@@ -28,6 +28,7 @@ from .layout import EditorLayout
 from .reporting import report
 from .style import generate_built_in_styles, get_editor_style_by_name
 from .window_arrangement import WindowArrangement
+from .io import FileIO, DirectoryIO, HttpIO, GZipFileIO
 
 import pygments
 import os
@@ -67,6 +68,14 @@ class Editor(object):
         # Load styles. (Mapping from name to Style class.)
         self.styles = generate_built_in_styles()
 
+        # I/O backends.
+        self.io_backends = [
+            DirectoryIO(),
+            HttpIO(),
+            GZipFileIO(),  # Should come before FileIO.
+            FileIO(),
+        ]
+
         # Create eventloop.
         self.eventloop = create_eventloop()
 
@@ -89,32 +98,32 @@ class Editor(object):
         # Command line previewer.
         self.previewer = CommandPreviewer(self)
 
-    def load_initial_files(self, filenames, in_tab_pages=False, hsplit=False, vsplit=False):
+    def load_initial_files(self, locations, in_tab_pages=False, hsplit=False, vsplit=False):
         """
         Load a list of files.
         """
         assert in_tab_pages + hsplit + vsplit <= 1  # Max one of these options.
 
         # When no files were given, open at least one empty buffer.
-        filenames2 = filenames or [None]
+        locations2 = locations or [None]
 
         # First file
-        self.window_arrangement.open_buffer(filenames2[0])
+        self.window_arrangement.open_buffer(locations2[0])
 
-        for f in filenames2[1:]:
+        for f in locations2[1:]:
             if in_tab_pages:
                 self.window_arrangement.create_tab(f)
             elif hsplit:
-                self.window_arrangement.hsplit(filename=f)
+                self.window_arrangement.hsplit(location=f)
             elif vsplit:
-                self.window_arrangement.vsplit(filename=f)
+                self.window_arrangement.vsplit(location=f)
             else:
                 self.window_arrangement.open_buffer(f)
 
         self.window_arrangement.active_tab_index = 0
 
-        if filenames and len(filenames) > 1:
-            self.show_message('%i files loaded.' % len(filenames))
+        if locations and len(locations) > 1:
+            self.show_message('%i files loaded.' % len(locations))
 
     def _create_cli(self):
         """
@@ -242,9 +251,9 @@ class Editor(object):
             text = eb.buffer.text
             self._reporters_running_for_buffer_names.add(name)
 
-            # Don't run reporter when we don't have a filename. (We need to
+            # Don't run reporter when we don't have a location. (We need to
             # know the filetype, actually.)
-            if eb.filename is None:
+            if eb.location is None:
                 return
 
             # Better not to access the document in an executor.
@@ -252,7 +261,7 @@ class Editor(object):
 
             def in_executor():
                 # Call reporter
-                report_errors = report(eb.filename, document)
+                report_errors = report(eb.location, document)
 
                 def ready():
                     self._reporters_running_for_buffer_names.remove(name)

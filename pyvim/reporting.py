@@ -7,7 +7,7 @@ input.
 
 Usage::
 
-    errors = report('filename.py', Document('file content'))
+    errors = report('location.py', Document('file content'))
 """
 from __future__ import unicode_literals
 import pyflakes.api
@@ -32,16 +32,16 @@ class ReporterError(object):
         self.message_token_list = message_token_list
 
 
-def report(filename, document):
+def report(location, document):
     """
     Run reporter on document and return list of ReporterError instances.
-    (Depending on the filename it will or won't run anything.)
+    (Depending on the location it will or won't run anything.)
 
     Returns a list of `ReporterError`.
     """
-    assert isinstance(filename, six.string_types)
+    assert isinstance(location, six.string_types)
 
-    if filename.endswith('.py'):
+    if location.endswith('.py'):
         return report_pyflakes(document)
     else:
         return []
@@ -88,10 +88,10 @@ class _FlakesReporter(object):
     def __init__(self):
         self.messages = []
 
-    def unexpectedError(self, filename, msg):
+    def unexpectedError(self, location, msg):
         pass
 
-    def syntaxError(self, filename, msg, lineno, offset, text):
+    def syntaxError(self, location, msg, lineno, offset, text):
         pass
 
     def flake(self, message):

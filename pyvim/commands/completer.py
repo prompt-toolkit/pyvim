@@ -19,7 +19,7 @@ def create_command_completer(editor):
 
     return GrammarCompleter(COMMAND_GRAMMAR, {
         'command': WordCompleter(commands),
-        'filename': PathCompleter(expanduser=True),
+        'location': PathCompleter(expanduser=True),
         'set_option': WordCompleter(SET_COMMANDS),
         'buffer_name': BufferNameCompleter(editor),
         'colorscheme': ColorSchemeCompleter(editor),
@@ -40,13 +40,17 @@ class BufferNameCompleter(Completer):
         text = document.text_before_cursor
 
         for eb in self.editor.window_arrangement.editor_buffers:
-            filename = eb.filename
+            location = eb.location
 
-            if filename is not None and text in filename:
-                yield Completion(filename, start_position=-len(text), display=filename)
+            if location is not None and text in location:
+                yield Completion(location, start_position=-len(text), display=location)
 
 
 class ColorSchemeCompleter(Completer):
+    """
+    Complete on the names of the color schemes that are currently known to the
+    Editor instance.
+    """
     def __init__(self, editor):
         self.editor = editor
 

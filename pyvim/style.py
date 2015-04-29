@@ -52,7 +52,7 @@ style_extensions = {
 
     # Highlighting for the text in the command bar.
     Token.CommandLine.Command:    'bold',
-    Token.CommandLine.Filename:   'bg:#bbbbff #000000',
+    Token.CommandLine.Location:   'bg:#bbbbff #000000',
 
     # Frame borders (for between vertical splits.)
     Token.FrameBorder:            'bold', #bg:#88aa88 #ffffff',

@@ -227,13 +227,13 @@ class WindowArrangement(object):
         if self.active_tab and self.active_tab.active_window:
             return self.active_tab.active_window.editor_buffer
 
-    def get_editor_buffer_for_filename(self, filename):
+    def get_editor_buffer_for_location(self, location):
         """
-        Return the `EditorBuffer` for this filename.
+        Return the `EditorBuffer` for this location.
         When this file was not yet loaded, return None
         """
         for eb in self.editor_buffers:
-            if eb.filename == filename:
+            if eb.location == location:
                 return eb
 
     def get_editor_buffer_for_buffer_name(self, buffer_name):
@@ -255,22 +255,22 @@ class WindowArrangement(object):
             del self.tab_pages[self.active_tab_index]
             self.active_tab_index = max(0, self.active_tab_index - 1)
 
-    def hsplit(self, filename=None, new=False, text=None):
+    def hsplit(self, location=None, new=False, text=None):
         """ Split horizontally. """
-        assert filename is None or text is None or new is False  # Don't pass two of them.
+        assert location is None or text is None or new is False  # Don't pass two of them.
 
-        if filename or text or new:
-            editor_buffer = self._get_or_create_editor_buffer(filename=filename, text=text)
+        if location or text or new:
+            editor_buffer = self._get_or_create_editor_buffer(location=location, text=text)
         else:
             editor_buffer = None
         self.active_tab.hsplit(editor_buffer)
 
-    def vsplit(self, filename=None, new=False, text=None):
+    def vsplit(self, location=None, new=False, text=None):
         """ Split vertically. """
-        assert filename is None or text is None or new is False  # Don't pass two of them.
+        assert location is None or text is None or new is False  # Don't pass two of them.
 
-        if filename or text or new:
-            editor_buffer = self._get_or_create_editor_buffer(filename=filename, text=text)
+        if location or text or new:
+            editor_buffer = self._get_or_create_editor_buffer(location=location, text=text)
         else:
             editor_buffer = None
         self.active_tab.vsplit(editor_buffer)
@@ -333,7 +333,7 @@ class WindowArrangement(object):
         assert isinstance(buffer_name, string_types)
 
         for i, eb in enumerate(self.editor_buffers):
-            if (eb.filename == buffer_name or
+            if (eb.location == buffer_name or
                     (buffer_name.isdigit() and int(buffer_name) == i)):
                 self.show_editor_buffer(eb)
                 break
@@ -372,36 +372,36 @@ class WindowArrangement(object):
         # Start reporter.
         self.editor.run_reporter_for_editor_buffer(editor_buffer)
 
-    def _get_or_create_editor_buffer(self, filename=None, text=None):
+    def _get_or_create_editor_buffer(self, location=None, text=None):
         """
-        Given a filename, return the `EditorBuffer` instance that we have if
+        Given a location, return the `EditorBuffer` instance that we have if
         the file is already open, or create a new one.
 
-        When filename is None, this creates a new buffer.
+        When location is None, this creates a new buffer.
         """
-        assert filename is None or text is None  # Don't pass two of them.
-        assert filename is None or isinstance(filename, string_types)
+        assert location is None or text is None  # Don't pass two of them.
+        assert location is None or isinstance(location, string_types)
 
         def new_name():
             """ Generate name for new buffer. """
             self._buffer_index += 1
             return 'buffer-%i' % self._buffer_index
 
-        if filename is None:
+        if location is None:
             # Create and add an empty EditorBuffer
             eb = EditorBuffer(self.editor, new_name(), text=text)
             self._add_editor_buffer(eb)
 
             return eb
         else:
-            # When a filename is given, first look whether the file was already
+            # When a location is given, first look whether the file was already
             # opened.
-            eb = self.get_editor_buffer_for_filename(filename)
+            eb = self.get_editor_buffer_for_location(location)
 
             # Not found? Create one.
             if eb is None:
                 # Create and add EditorBuffer
-                eb = EditorBuffer(self.editor, new_name(), filename)
+                eb = EditorBuffer(self.editor, new_name(), location)
                 self._add_editor_buffer(eb)
 
                 return eb
@@ -409,11 +409,11 @@ class WindowArrangement(object):
                 # Found! Return it.
                 return eb
 
-    def open_buffer(self, filename=None, show_in_current_window=False):
+    def open_buffer(self, location=None, show_in_current_window=False):
         """
         Open/create a file, load it, and show it in a new buffer.
         """
-        eb = self._get_or_create_editor_buffer(filename)
+        eb = self._get_or_create_editor_buffer(location)
 
         if show_in_current_window:
             self.show_editor_buffer(eb)
@@ -461,11 +461,11 @@ class WindowArrangement(object):
                 # automatically.)
                 eb = self._get_or_create_editor_buffer()
 
-    def create_tab(self, filename=None):
+    def create_tab(self, location=None):
         """
         Create a new tab page.
         """
-        eb = self._get_or_create_editor_buffer(filename)
+        eb = self._get_or_create_editor_buffer(location)
 
         self.tab_pages.insert(self.active_tab_index + 1, TabPage(Window(eb)))
         self.active_tab_index += 1
