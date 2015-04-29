@@ -44,7 +44,7 @@ def create_key_bindings(editor):
     handle = create_handle_decorator(manager.registry)
 
     @handle(Keys.ControlF)
-    def _(event):
+    def scroll_forward(event, half=False):
         """
         Scroll window down.
         """
@@ -52,14 +52,20 @@ def create_key_bindings(editor):
         b = event.cli.current_buffer
 
         if w and w.render_info:
+            # Determine height to move.
+            shift = w.render_info.rendered_height
+            if half:
+                shift = int(shift / 2)
+
+            # Scroll.
             new_document_line = min(
                 b.document.line_count - 1,
-                b.document.cursor_position_row + int(w.render_info.rendered_height))
+                b.document.cursor_position_row + int(shift))
             b.cursor_position = b.document.translate_row_col_to_index(new_document_line, 0)
             w.vertical_scroll = w.render_info.input_line_to_screen_line(new_document_line)
 
-    @handle(Keys.ControlU)
-    def _(event):
+    @handle(Keys.ControlB)
+    def scroll_backward(event, half=False):
         """
         Scroll window up.
         """
@@ -67,10 +73,29 @@ def create_key_bindings(editor):
         b = event.cli.current_buffer
 
         if w and w.render_info:
-            new_document_line = max(0, b.document.cursor_position_row -
-                                    int(w.render_info.rendered_height / 2))
+            # Determine height to move.
+            shift = w.render_info.rendered_height
+            if half:
+                shift = int(shift / 2)
+
+            # Scroll.
+            new_document_line = max(0, b.document.cursor_position_row - int(shift))
             b.cursor_position = b.document.translate_row_col_to_index(new_document_line, 0)
             w.vertical_scroll = w.render_info.input_line_to_screen_line(new_document_line)
+
+    @handle(Keys.ControlD)
+    def _(event):
+        """
+        Same as ControlF, but only scroll half a page.
+        """
+        scroll_forward(event, half=True)
+
+    @handle(Keys.ControlU)
+    def _(event):
+        """
+        Same as ControlB, but only scroll half a page.
+        """
+        scroll_backward(event, half=True)
 
     @handle(Keys.ControlE)
     def _(event):
