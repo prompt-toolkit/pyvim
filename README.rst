@@ -1,9 +1,11 @@
 pyvim
 =====
 
-*A Vi clone in Python.*
+*An implementation of Vim in Python*
 
-It's a bit experimental, but it's certainly usable.
+::
+
+    pip install pyvim
 
 .. image :: https://github.com/jonathanslenders/pyvim/raw/master/docs/images/welcome-screen.png
 
@@ -14,9 +16,20 @@ issue, I appreciate it.
 Installation
 ------------
 
+Simply install ``pyvim`` using pip:
+
 ::
 
     pip install pyvim
+
+
+It is a good idea to add the following to your ``~/.bashrc`` if you really
+want to use it:
+
+::
+
+    alias vi=pyvim
+    export EDITOR=pyvim
 
 
 The good things
