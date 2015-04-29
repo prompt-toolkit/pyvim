@@ -116,7 +116,7 @@ def _bufferlist_overlay_visible_condition(cli):
     """
     text = cli.buffers[COMMAND_BUFFER].text.lstrip()
     return cli.current_buffer_name == COMMAND_BUFFER and (
-            text.startswith('b ') or text.startswith('buffer '))
+            any(text.startswith(p) for p in ['b ', 'b! ', 'buffer', 'buffer!']))
 
 bufferlist_overlay_visible_filter = Condition(_bufferlist_overlay_visible_condition)
 

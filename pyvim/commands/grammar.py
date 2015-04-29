@@ -12,10 +12,10 @@ COMMAND_GRAMMAR = compile(r"""
     \s*
     (
         # Commands accepting a location.
-        (?P<command>%(commands_taking_locations)s)  \s+   (?P<location>[^\s]+)   |
+        (?P<command>%(commands_taking_locations)s)(?P<force>!?)  \s+   (?P<location>[^\s]+)   |
 
         # Commands accepting a buffer.
-        (?P<command>b|buffer)  \s+   (?P<buffer_name>[^\s]+)    |
+        (?P<command>b|buffer)(?P<force>!?)  \s+   (?P<buffer_name>[^\s]+)    |
 
         # Jump to line numbers.
         (?P<go_to_line>\d+)                                     |
@@ -30,8 +30,8 @@ COMMAND_GRAMMAR = compile(r"""
         # Shell command
         !(?P<shell_command>.*)                                  |
 
-        # Any command. (For command completions.)
-        (?P<command>[^\s]+)                                     |
+        # Any other normal command.
+        (?P<command>[^\s!]+)(?P<force>!?)                         |
 
         # Accept the empty input as well. (Ignores everything.)
 

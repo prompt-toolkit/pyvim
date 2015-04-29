@@ -14,6 +14,9 @@ SET_COMMANDS = {}  # Mapping ':set'-commands to their handler.
 SET_COMMANDS_TAKING_VALUE = set()
 
 
+_NO_WRITE_SINCE_LAST_CHANGE_TEXT = 'No write since last change (add ! to override)'
+
+
 def has_command_handler(command):
     return command in COMMANDS_TO_HANDLERS
 
@@ -45,7 +48,7 @@ def _cmd(name):
     return decorator
 
 
-def location_cmd(name):
+def location_cmd(name, accepts_force=False):
     """
     Decorator that registers a command that takes a location as (optional)
     parameter.
@@ -56,30 +59,40 @@ def location_cmd(name):
         @_cmd(name)
         def command_wrapper(editor, variables):
             location = variables.get('location')
-            func(editor, location)
+            force = bool(variables['force'])
+
+            if accepts_force:
+                func(editor, location, force=force)
+            else:
+                func(editor, location)
         return func
     return decorator
 
 
-def cmd(name):
+def cmd(name, accepts_force=False):
     """
     Decarator that registers a command that doesn't take any parameters.
     """
     def decorator(func):
         @_cmd(name)
         def command_wrapper(editor, variables):
-            func(editor)
+            force = bool(variables['force'])
+
+            if accepts_force:
+                func(editor, force=force)
+            else:
+                func(editor)
         return func
     return decorator
 
 
-def set_cmd(name, takes_value=False):
+def set_cmd(name, accepts_value=False):
     """
     Docorator that registers a ':set'-command.
     """
     def decorator(func):
         SET_COMMANDS[name] = func
-        if takes_value:
+        if accepts_value:
             SET_COMMANDS_TAKING_VALUE.add(name)
         return func
     return decorator
@@ -105,20 +118,30 @@ def _(editor, variables):
         editor.show_message('Unknown option: %s' % option)
 
 
-@cmd('bn')
-def _(editor):
+@cmd('bn', accepts_force=True)
+def _bn(editor, force=False):
     """
     Go to next buffer.
     """
-    editor.window_arrangement.go_to_next_buffer()
+    eb = editor.window_arrangement.active_editor_buffer
+
+    if not force and eb.has_unsaved_changes:
+        editor.show_message(_NO_WRITE_SINCE_LAST_CHANGE_TEXT)
+    else:
+        editor.window_arrangement.go_to_next_buffer()
 
 
-@cmd('bp')
-def _(editor):
+@cmd('bp', accepts_force=True)
+def _bp(editor, force=False):
     """
     Go to previous buffer.
     """
-    editor.window_arrangement.go_to_previous_buffer()
+    eb = editor.window_arrangement.active_editor_buffer
+
+    if not force and eb.has_unsaved_changes:
+        editor.show_message(_NO_WRITE_SINCE_LAST_CHANGE_TEXT)
+    else:
+        editor.window_arrangement.go_to_previous_buffer()
 
 
 @cmd('only')
@@ -202,21 +225,15 @@ def _buffer(editor, variables, force=False):
     Go to one of the open buffers.
     """
     eb = editor.window_arrangement.active_editor_buffer
+    force = bool(variables['force'])
 
     buffer_name = variables.get('buffer_name')
     if buffer_name:
         if not force and eb.has_unsaved_changes:
-            editor.show_message('No write since last change (add ! to override)')
+            editor.show_message(_NO_WRITE_SINCE_LAST_CHANGE_TEXT)
         else:
             editor.window_arrangement.go_to_buffer(buffer_name)
 
-@_cmd('b!')
-@_cmd('buffer!')
-def _(editor, variables):
-    """
-    Force go to one of the open buffers.
-    """
-    _buffer(editor, variables, force=True)
 
 @cmd('bw')
 def _(editor):
@@ -225,8 +242,7 @@ def _(editor):
     """
     eb = editor.window_arrangement.active_editor_buffer
     if eb.has_unsaved_changes:
-        editor.show_message('No write since last change for buffer. '
-                            '(add ! to override)')
+        editor.show_message(_NO_WRITE_SINCE_LAST_CHANGE_TEXT)
     else:
         editor.window_arrangement.close_buffer()
 
@@ -248,8 +264,8 @@ def _(editor, location):
     editor.window_arrangement.open_buffer(location, show_in_current_window=True)
 
 
-@cmd('q')
-@cmd('quit')
+@cmd('q', accepts_force=True)
+@cmd('quit', accepts_force=True)
 def quit(editor, all_=False, force=False):
     """
     Quit.
@@ -258,7 +274,7 @@ def quit(editor, all_=False, force=False):
 
     # When there are buffers that have unsaved changes, show balloon.
     if not force and any(eb.has_unsaved_changes for eb in ebs):
-        editor.show_message('No write since last change (add ! to override)')
+        editor.show_message(_NO_WRITE_SINCE_LAST_CHANGE_TEXT)
 
     # When there is more than one buffer open.
     elif not all_ and len(ebs) > 1:
@@ -268,33 +284,22 @@ def quit(editor, all_=False, force=False):
         editor.cli.set_return_value('')
 
 
-@cmd('qa')
-@cmd('qall')
-def _(editor):
+@cmd('qa', accepts_force=True)
+@cmd('qall', accepts_force=True)
+def _(editor, force=False):
     """
     Quit all.
     """
-    quit(editor, all_=True)
+    quit(editor, all_=True, force=force)
 
 
-@cmd('q!')
-@cmd('qa!')
-@cmd('quit!')
-@cmd('qall!')
-def _(editor):
-    """
-    Force quit.
-    """
-    quit(editor, all_=True, force=True)
-
-
-@location_cmd('w')
-@location_cmd('write')
-def write(editor, location, overwrite=False):
+@location_cmd('w', accepts_force=True)
+@location_cmd('write', accepts_force=True)
+def write(editor, location, force=False):
     """
     Write file.
     """
-    if location and not overwrite and os.path.exists(location):
+    if location and not force and os.path.exists(location):
         editor.show_message('File exists (add ! to overriwe)')
     else:
         eb = editor.window_arrangement.active_editor_buffer
@@ -304,21 +309,12 @@ def write(editor, location, overwrite=False):
             eb.write(location)
 
 
-@location_cmd('w!')
-@location_cmd('write!')
-def _(editor, location):
-    """
-    Write (and overwrite) file.
-    """
-    write(editor, location, overwrite=True)
-
-
-@location_cmd('wq')
-def _(editor, location):
+@location_cmd('wq', accepts_force=True)
+def _(editor, location, force=False):
     """
     Write file and quit.
     """
-    write(editor, location)
+    write(editor, location, force=force)
     editor.cli.set_return_value('')
 
 
@@ -333,15 +329,6 @@ def _(editor):
     else:
         eb.write()
         quit(editor, all_=True, force=False)
-
-
-@location_cmd('wq!')
-def _(editor, location):
-    """
-    Write file (and overwrite) and quit.
-    """
-    write(editor, location, overwrite=True)
-    editor.cli.set_return_value('')
 
 
 @cmd('help')
@@ -472,8 +459,8 @@ def _(editor):
     editor.expand_tab = False
 
 
-@set_cmd('tabstop', takes_value=True)
-@set_cmd('ts', takes_value=True)
+@set_cmd('tabstop', accepts_value=True)
+@set_cmd('ts', accepts_value=True)
 def _(editor, value):
     """
     Set tabstop.
