@@ -331,6 +331,7 @@ def _(editor):
         quit(editor, all_=True, force=False)
 
 
+@cmd('h')
 @cmd('help')
 def _(editor):
     """
