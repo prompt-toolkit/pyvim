@@ -15,6 +15,7 @@ SET_COMMANDS_TAKING_VALUE = set()
 
 
 _NO_WRITE_SINCE_LAST_CHANGE_TEXT = 'No write since last change (add ! to override)'
+_NO_FILE_NAME = 'No file name'
 
 
 def has_command_handler(command):
@@ -255,15 +256,26 @@ def _(editor):
     editor.window_arrangement.close_buffer()
 
 
-@location_cmd('o')
-@location_cmd('open')
-@location_cmd('e')
-@location_cmd('edit')
-def _(editor, location):
+@location_cmd('o', accepts_force=True)
+@location_cmd('open', accepts_force=True)
+@location_cmd('e', accepts_force=True)
+@location_cmd('edit', accepts_force=True)
+def _(editor, location, force=False):
     """
     Edit new buffer.
     """
-    editor.window_arrangement.open_buffer(location, show_in_current_window=True)
+    if location is None:
+        # Edit/open without a location will reload the current file, if there are
+        # no changes.
+        eb = editor.window_arrangement.active_editor_buffer
+        if eb.location is None:
+            editor.show_message(_NO_FILE_NAME)
+        elif not force and eb.has_unsaved_changes:
+            editor.show_message(_NO_WRITE_SINCE_LAST_CHANGE_TEXT)
+        else:
+            eb.reload()
+    else:
+        editor.window_arrangement.open_buffer(location, show_in_current_window=True)
 
 
 @cmd('q', accepts_force=True)
@@ -306,7 +318,7 @@ def write(editor, location, force=False):
     else:
         eb = editor.window_arrangement.active_editor_buffer
         if location is None and eb.location is None:
-            editor.show_message('No file name')
+            editor.show_message(_NO_FILE_NAME)
         else:
             eb.write(location)
 
@@ -327,7 +339,7 @@ def _(editor):
     """
     eb = editor.window_arrangement.active_editor_buffer
     if eb.location is None:
-        editor.show_message('No file name for buffer')
+        editor.show_message(_NO_FILE_NAME)
     else:
         eb.write()
         quit(editor, all_=True, force=False)

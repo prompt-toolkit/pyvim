@@ -92,6 +92,16 @@ class EditorBuffer(object):
         self.editor.show_message('Cannot read: %r' % location)
         return ''
 
+    def reload(self):
+        """
+        Reload file again from storage.
+        """
+        text = self._read(self.location)
+        cursor_position = min(self.buffer.cursor_position, len(text))
+
+        self.buffer.document = Document(text, cursor_position)
+        self._file_content = text
+
     def write(self, location=None):
         """
         Write file to I/O backend.
