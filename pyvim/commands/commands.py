@@ -255,6 +255,8 @@ def _(editor):
     editor.window_arrangement.close_buffer()
 
 
+@location_cmd('o')
+@location_cmd('open')
 @location_cmd('e')
 @location_cmd('edit')
 def _(editor, location):
