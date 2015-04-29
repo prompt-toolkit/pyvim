@@ -32,7 +32,7 @@ class EditorBuffer(object):
         self.buffer_name = buffer_name
         self.location = location
         self.encoding = 'utf-8'
-        
+
         #: is_new: True when this file does not yet exist in the storage.
         self.is_new = True
 

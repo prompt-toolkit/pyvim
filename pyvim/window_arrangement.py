@@ -56,6 +56,12 @@ class TabPage(object):
         """ The amount of windows in this tab. """
         return len(self.windows())
 
+    def visible_editor_buffers(self):
+        """
+        Return a list of visible `EditorBuffer` instances.
+        """
+        return [w.editor_buffer for w in self.windows()]
+
     def _walk_through_windows(self):
         """
         Yields (Split, Window) tuples.
@@ -246,14 +252,24 @@ class WindowArrangement(object):
                 return eb
 
     def close_window(self):
-        """ Close active window of active tab. """
+        """
+        Close active window of active tab.
+        """
         self.active_tab.close_active_window()
 
+        # Clean up buffers.
+        self._auto_close_new_empty_buffers()
+
     def close_tab(self):
-        """ Close active tab. """
+        """
+        Close active tab.
+        """
         if len(self.tab_pages) > 1:  # Cannot close last tab.
             del self.tab_pages[self.active_tab_index]
             self.active_tab_index = max(0, self.active_tab_index - 1)
+
+        # Clean up buffers.
+        self._auto_close_new_empty_buffers()
 
     def hsplit(self, location=None, new=False, text=None):
         """ Split horizontally. """
@@ -287,8 +303,13 @@ class WindowArrangement(object):
         self.active_tab.cycle_focus()
 
     def show_editor_buffer(self, editor_buffer):
-        """ Show this EditorBuffer in the current window. """
+        """
+        Show this EditorBuffer in the current window.
+        """
         self.active_tab.show_editor_buffer(editor_buffer)
+
+        # Clean up buffers.
+        self._auto_close_new_empty_buffers()
 
     def go_to_next_buffer(self, _previous=False):
         """
@@ -306,6 +327,9 @@ class WindowArrangement(object):
 
             # Open new buffer in active tab.
             self.active_tab.show_editor_buffer(self.editor_buffers[new_index])
+
+            # Clean up buffers.
+            self._auto_close_new_empty_buffers()
 
     def go_to_previous_buffer(self):
         """
@@ -418,6 +442,25 @@ class WindowArrangement(object):
         if show_in_current_window:
             self.show_editor_buffer(eb)
 
+    def _auto_close_new_empty_buffers(self):
+        """
+        When there are new, empty buffers open. (Like, created when the editor
+        starts without any files.) These can be removed at the point when there
+        is no more window showing them.
+
+        This should be called every time when a window is closed, or when the
+        content of a window is replcaed by something new.
+        """
+        # Get all visible EditorBuffers
+        ebs = set()
+        for t in self.tab_pages:
+            ebs |= set(t.visible_editor_buffers())
+
+        # Remove empty/new buffers that are hidden.
+        for eb in self.editor_buffers[:]:
+            if eb.is_new and eb not in ebs and eb.buffer.text == '':
+                self.editor_buffers.remove(eb)
+
     def close_buffer(self):
         """
         Close current buffer. When there are other windows showing the same
@@ -476,7 +519,7 @@ class WindowArrangement(object):
         open buffers.
         """
         active_eb = self.active_editor_buffer
-        visible_ebs = [w.editor_buffer for w in self.active_tab.windows()]
+        visible_ebs = self.active_tab.visible_editor_buffers()
 
         def make_info(i, eb):
             return OpenBufferInfo(
