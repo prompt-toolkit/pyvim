@@ -1,7 +1,7 @@
 pyvim
 =====
 
-*A Vi clone in Python.*
+*A Vim clone in Python.*
 
 It's a bit experimental, but it's certainly usable.
 
