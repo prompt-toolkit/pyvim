@@ -4,7 +4,7 @@ import codecs
 import gzip
 import os
 import six
-import urllib2
+from six.moves import urllib
 
 from .base import EditorIO
 
@@ -142,8 +142,7 @@ class HttpIO(EditorIO):
 
     def read(self, location):
         # Do Http request.
-        req = urllib2.Request(location)
-        bytes = urllib2.urlopen(req).read()
+        bytes = urllib.request.urlopen(location).read()
 
         # Return decoded.
         return _auto_decode(bytes)
