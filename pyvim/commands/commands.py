@@ -240,26 +240,17 @@ def _buffer(editor, variables, force=False):
             editor.window_arrangement.go_to_buffer(buffer_name)
 
 
-@cmd('bw')
-@cmd('bd')
-def _(editor):
+@cmd('bw', accepts_force=True)
+@cmd('bd', accepts_force=True)
+def _(editor, force=False):
     """
     Wipe buffer.
     """
     eb = editor.window_arrangement.active_editor_buffer
-    if eb.has_unsaved_changes:
+    if not force and eb.has_unsaved_changes:
         editor.show_message(_NO_WRITE_SINCE_LAST_CHANGE_TEXT)
     else:
         editor.window_arrangement.close_buffer()
-
-
-@cmd('bw!')
-@cmd('bd!')
-def _(editor):
-    """
-    Force wipe buffer.
-    """
-    editor.window_arrangement.close_buffer()
 
 
 @location_cmd('o', accepts_force=True)
