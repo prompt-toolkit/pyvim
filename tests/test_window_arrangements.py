@@ -1,33 +1,21 @@
 from __future__ import unicode_literals
 
 from prompt_toolkit.buffer import Buffer
-from pyvim.window_arrangement import TabPage, EditorBuffer, Window, HSplit, VSplit
-
-import unittest
+from pyvim.window_arrangement import EditorBuffer, VSplit
 
 
-class BufferTest(unittest.TestCase):
-    def setUp(self):
-        b = Buffer()
-        eb = EditorBuffer('b1', b)
-        self.window = Window(eb)
-        self.tabpage = TabPage(self.window)
-
-    def test_initial(self):
-        self.assertIsInstance(self.tabpage.root, VSplit)
-        self.assertEqual(self.tabpage.root, [self.window])
-
-    def test_vsplit(self):
-        # Create new buffer.
-        b = Buffer()
-        eb = EditorBuffer('b1', b)
-
-        # Insert in tab, by splitting.
-        self.tabpage.vsplit(eb)
-
-        self.assertIsInstance(self.tabpage.root, VSplit)
-        self.assertEqual(len(self.tabpage.root), 2)
+def test_initial(window, tab_page):
+    assert isinstance(tab_page.root, VSplit)
+    assert tab_page.root == [window]
 
 
-if __name__ == '__main__':
-    unittest.main()
+def test_vsplit(tab_page):
+    # Create new buffer.
+    b = Buffer()
+    eb = EditorBuffer(b, 'b1')
+
+    # Insert in tab, by splitting.
+    tab_page.vsplit(eb)
+
+    assert isinstance(tab_page.root, VSplit)
+    assert len(tab_page.root) == 2
