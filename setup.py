@@ -21,6 +21,7 @@ setup(
     long_description=long_description,
     packages=find_packages('.'),
     install_requires = [
+        'mistune',
         'prompt-toolkit==0.34',
         'ptpython==0.8',  # For the Python completion (with Jedi.)
         'pyflakes',       # For Python error reporting.
