@@ -1,6 +1,7 @@
 from __future__ import unicode_literals, print_function
-import six
 import os
+import six
+import sys
 
 __all__ = (
     'has_command_handler',
@@ -327,6 +328,17 @@ def _(editor, location, force=False):
     """
     write(editor, location, force=force)
     editor.cli.set_return_value('')
+
+
+@cmd('cq')
+def _(editor):
+    """
+    Quit with non zero exit status.
+    """
+    # Note: the try/finally in `prompt_toolkit.Interface.read_input`
+    # will ensure that the render output is reset, leaving the alternate
+    # screen before quiting.
+    sys.exit(1)
 
 
 @cmd('wqa')
