@@ -145,6 +145,29 @@ Maybe we will also have line folding and probably block editing. Maybe some
 day we will have a built-in Python debugger or mouse support. We'll see. :)
 
 
+Testing
+-------
+
+To run all tests, install pytest:
+
+    pip install pytest
+
+And then run from root pyvim directory:
+
+    py.test
+
+To test pyvim against all supported python versions, install tox:
+
+    pip install tox
+
+And then run from root pyvim directory:
+
+    tox
+
+You need to have installed all the supported versions of python in order to run
+tox command successfully (2.6, 2.7, 3.1, 3.2, 3.3, 3.4).
+
+
 Why did I create Pyvim?
 -----------------------
 
