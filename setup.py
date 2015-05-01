@@ -24,6 +24,7 @@ setup(
         'prompt-toolkit==0.34',
         'ptpython==0.8',  # For the Python completion (with Jedi.)
         'pyflakes',       # For Python error reporting.
+        'docopt',         # For command line arguments.
     ],
     entry_points={
         'console_scripts': [
