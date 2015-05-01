@@ -21,13 +21,16 @@ def configure(editor):
 
     # Highlight search. (:set hlsearch)
     editor.highlight_search = True
-    
+
     # Case insensitive searching. (:set ignorecase)
     editor.ignore_case = True
 
     # Expand tab. (Pressing Tab will insert spaces.)
     editor.expand_tab = True  # (:set expandtab)
     editor.tabstop = 4  # (:set tabstop=4)
+
+    # Scroll offset (:set scrolloff)
+    editor.scroll_offset = 2
 
     # Show tabs and trailing whitespace. (:set list)
     editor.display_unprintable_characters = True

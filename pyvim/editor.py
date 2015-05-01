@@ -55,6 +55,7 @@ class Editor(object):
         self.ignore_case = False  # Ignore case while searching.
         self.display_unprintable_characters = True  # ':set list'
         self.enable_jedi = True  # ':set jedi', for Python Jedi completion.
+        self.scroll_offset = 4  # ':set scrolloff'
 
         # Ensure config directory exists.
         self.config_directory = os.path.abspath(os.path.expanduser(config_directory))

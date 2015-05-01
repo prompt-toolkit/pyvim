@@ -106,9 +106,11 @@ def create_key_bindings(editor):
         b = event.cli.current_buffer
 
         if w:
-            # When the cursor is at the bottom, move to the previous line. (Otherwise, only scroll.)
-            if w.render_info and w.render_info.first_visible_line == b.document.cursor_position_row:
-                b.cursor_position += b.document.get_cursor_down_position()
+            # When the cursor is at the top, move to the next line. (Otherwise, only scroll.)
+            if w.render_info:
+                info = w.render_info
+                if info.cursor_position.y <= info.configured_scroll_offset:
+                    b.cursor_position += b.document.get_cursor_down_position()
 
             w.vertical_scroll += 1
 
@@ -121,9 +123,12 @@ def create_key_bindings(editor):
         b = event.cli.current_buffer
 
         if w:
-            # When the cursor is at the top, move to the next line. (Otherwise, only scroll.)
-            if w.render_info and w.render_info.last_visible_line == b.document.cursor_position_row:
-                b.cursor_position += b.document.get_cursor_up_position()
+            # When the cursor is at the bottom, move to the previous line. (Otherwise, only scroll.)
+            if w.render_info:
+                info = w.render_info
+
+                if info.cursor_position.y >= info.rendered_height - 1 - info.configured_scroll_offset:
+                    b.cursor_position += b.document.get_cursor_up_position()
 
             # Scroll window
             w.vertical_scroll -= 1
