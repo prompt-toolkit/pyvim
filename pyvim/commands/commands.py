@@ -497,6 +497,25 @@ def _(editor, value):
             editor.show_message('Number required after =')
 
 
+@set_cmd('scrolloff', accepts_value=True)
+@set_cmd('so', accepts_value=True)
+def _(editor, value):
+    """
+    Set scroll offset.
+    """
+    if value is None:
+        editor.show_message('scrolloff=%i' % editor.scroll_offset)
+    else:
+        try:
+            value = int(value)
+            if value >= 0:
+                editor.scroll_offset = value
+            else:
+                editor.show_message('Argument must be positive')
+        except ValueError:
+            editor.show_message('Number required after =')
+
+
 @set_cmd('incsearch')
 def _(editor):
     """ Enable incsearch. """

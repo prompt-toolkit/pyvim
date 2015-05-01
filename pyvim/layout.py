@@ -2,7 +2,7 @@
 The actual layout for the renderer.
 """
 from __future__ import unicode_literals
-from prompt_toolkit.filters import HasFocus, HasSearch, Condition, HasArg
+from prompt_toolkit.filters import HasFocus, HasSearch, Condition, HasArg, Always
 from prompt_toolkit.key_binding.vi_state import InputMode
 from prompt_toolkit.layout import HSplit, VSplit, FloatContainer, Float
 from prompt_toolkit.layout.containers import Window
@@ -14,6 +14,7 @@ from prompt_toolkit.layout.processors import Processor, HighlightSearchProcessor
 from prompt_toolkit.layout.screen import Char
 from prompt_toolkit.layout.toolbars import TokenListToolbar, SystemToolbar, SearchToolbar, ValidationToolbar, CompletionsToolbar
 from prompt_toolkit.selection import SelectionType
+from prompt_toolkit.reactive import Integer
 
 from pygments.token import Token
 
@@ -441,7 +442,12 @@ class EditorLayout(object):
         """
         Create a Window for the buffer, with underneat a status bar.
         """
-        window = Window(self._create_buffer_control(editor_buffer))
+        # Pass `Editor.scroll_offset` by reference.
+        scroll_offset = Integer.from_callable(lambda: self.editor.scroll_offset)
+
+        window = Window(self._create_buffer_control(editor_buffer),
+                        allow_scroll_beyond_bottom=Always(),
+                        scroll_offset=scroll_offset)
 
         return HSplit([
             window,
