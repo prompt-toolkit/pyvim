@@ -241,6 +241,7 @@ def _buffer(editor, variables, force=False):
 
 
 @cmd('bw')
+@cmd('bd')
 def _(editor):
     """
     Wipe buffer.
@@ -253,6 +254,7 @@ def _(editor):
 
 
 @cmd('bw!')
+@cmd('bd!')
 def _(editor):
     """
     Force wipe buffer.
