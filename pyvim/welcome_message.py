@@ -31,7 +31,7 @@ def _t(token_list):
 
 
 WELCOME_MESSAGE_TOKENS = (
-    _t([(Token.Welcome.Title, 'PyVim - Pure Python Vi clone')]) +
+    _t([(Token.Welcome.Title, 'PyVim - An implementation of Vim in Python')]) +
     _t([(Token.Welcome.Body, 'Still experimental')]) +
     _t([(Token.Welcome.Body, '')]) +
     _t([(Token.Welcome.Body, 'version %s' % pyvim_version)]) +
