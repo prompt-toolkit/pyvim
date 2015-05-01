@@ -62,7 +62,9 @@ def location_cmd(name, accepts_force=False):
             location = variables.get('location')
             force = bool(variables['force'])
 
-            if accepts_force:
+            if force and not accepts_force:
+                editor.show_message('No ! allowed')
+            elif accepts_force:
                 func(editor, location, force=force)
             else:
                 func(editor, location)
@@ -79,7 +81,9 @@ def cmd(name, accepts_force=False):
         def command_wrapper(editor, variables):
             force = bool(variables['force'])
 
-            if accepts_force:
+            if force and not accepts_force:
+                editor.show_message('No ! allowed')
+            elif accepts_force:
                 func(editor, force=force)
             else:
                 func(editor)
