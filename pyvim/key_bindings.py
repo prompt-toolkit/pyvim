@@ -177,6 +177,15 @@ def create_key_bindings(editor):
                                     b.document.translate_row_col_to_index(new_document_line, 0))
             b.cursor_position += b.document.get_start_of_line_position(after_whitespace=True)
 
+    @handle(Keys.ControlT)
+    def _(event):
+        """
+        Override default behaviour of prompt-toolkit.
+        (Control-T will swap the last two characters before the cursor, because
+        that's what readline does.)
+        """
+        pass
+
     @handle(Keys.ControlT, filter=in_insert_mode)
     def _(event):
         """
