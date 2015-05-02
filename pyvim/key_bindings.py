@@ -84,21 +84,21 @@ def create_key_bindings(editor):
             w.vertical_scroll = w.render_info.input_line_to_screen_line(new_document_line)
 
     @handle(Keys.ControlD)
-    def _(event):
+    def scroll_half_page_down(event):
         """
         Same as ControlF, but only scroll half a page.
         """
         scroll_forward(event, half=True)
 
     @handle(Keys.ControlU)
-    def _(event):
+    def scroll_half_page_up(event):
         """
         Same as ControlB, but only scroll half a page.
         """
         scroll_backward(event, half=True)
 
     @handle(Keys.ControlE)
-    def _(event):
+    def scroll_one_line_down(event):
         """
         scroll_offset += 1
         """
@@ -115,7 +115,7 @@ def create_key_bindings(editor):
             w.vertical_scroll += 1
 
     @handle(Keys.ControlY)
-    def _(event):
+    def scroll_one_line_up(event):
         """
         scroll_offset -= 1
         """
@@ -134,7 +134,7 @@ def create_key_bindings(editor):
             w.vertical_scroll -= 1
 
     @handle(Keys.PageDown)
-    def _(event):
+    def scroll_page_down(event):
         """
         Scroll page down. (Prefer the cursor at the top of the page, after scrolling.)
         """
@@ -155,7 +155,7 @@ def create_key_bindings(editor):
             b.cursor_position += b.document.get_start_of_line_position(after_whitespace=True)
 
     @handle(Keys.PageUp)
-    def _(event):
+    def scroll_page_up(event):
         """
         Scroll page up. (Prefer the cursor at the bottom of the page, after scrolling.)
         """
@@ -187,7 +187,7 @@ def create_key_bindings(editor):
         pass
 
     @handle(Keys.ControlT, filter=in_insert_mode)
-    def _(event):
+    def indent_line(event):
         """
         Indent current line.
         """
@@ -207,7 +207,7 @@ def create_key_bindings(editor):
         b.cursor_position -= pos
 
     @handle(Keys.ControlR, filter=in_navigation_mode, save_before=False)
-    def _(event):
+    def redo(event):
         """
         Redo.
         """
@@ -222,7 +222,7 @@ def create_key_bindings(editor):
 
     @handle(Keys.Tab, filter=ViStateFilter(manager.vi_state, InputMode.INSERT) &
             ~HasFocus(COMMAND_BUFFER) & WhitespaceBeforeCursorOnLine())
-    def _(event):
+    def autocomplete_or_indent(event):
         """
         When the 'tab' key is pressed with only whitespace character before the
         cursor, do autocompletion. Otherwise, insert indentation.
@@ -250,7 +250,7 @@ def create_key_bindings(editor):
         editor.sync_with_prompt_toolkit()
 
     @handle(Keys.ControlW, 'n', filter=in_navigation_mode)
-    def _(event):
+    def horizontal_split(event):
         """
         Split horizontally.
         """
@@ -258,7 +258,7 @@ def create_key_bindings(editor):
         editor.sync_with_prompt_toolkit()
 
     @handle(Keys.ControlW, 'v', filter=in_navigation_mode)
-    def _(event):
+    def vertical_split(event):
         """
         Split vertically.
         """
@@ -276,7 +276,7 @@ def create_key_bindings(editor):
         editor.sync_with_prompt_toolkit()
 
     @handle(Keys.ControlJ, filter=in_navigation_mode)
-    def _(event):
+    def goto_line_beginning(event):
         """ Enter in navigation mode should move to the start of the next line. """
         b = event.current_buffer
         b.cursor_down(count=event.arg)

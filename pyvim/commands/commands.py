@@ -107,7 +107,7 @@ def set_cmd(name, accepts_value=False):
 # Actual command implementations
 
 @_cmd('set')
-def _(editor, variables):
+def set_command_execute(editor, variables):
     """
     Execute a ':set' command.
     """
@@ -151,7 +151,7 @@ def _bp(editor, force=False):
 
 
 @cmd('only')
-def _(editor):
+def only(editor):
     """
     Keep only the current window.
     """
@@ -159,7 +159,7 @@ def _(editor):
 
 
 @cmd('hide')
-def _(editor):
+def hide(editor):
     """
     Hide the current window.
     """
@@ -168,7 +168,7 @@ def _(editor):
 
 @location_cmd('sp')
 @location_cmd('split')
-def _(editor, location):
+def horizontal_split(editor, location):
     """
     Split window horizontally.
     """
@@ -177,7 +177,7 @@ def _(editor, location):
 
 @location_cmd('vsp')
 @location_cmd('vsplit')
-def _(editor, location):
+def vertical_split(editor, location):
     """
     Split window vertically.
     """
@@ -185,7 +185,7 @@ def _(editor, location):
 
 
 @cmd('new')
-def _(editor):
+def new_buffer(editor):
     """
     Create new buffer.
     """
@@ -193,7 +193,7 @@ def _(editor):
 
 
 @cmd('vnew')
-def _(editor):
+def new_vertical_buffer(editor):
     """
     Create new buffer, splitting vertically.
     """
@@ -201,7 +201,7 @@ def _(editor):
 
 
 @location_cmd('badd')
-def _(editor, location):
+def buffer_add(editor, location):
     """
     Add a new buffer.
     """
@@ -209,7 +209,7 @@ def _(editor, location):
 
 
 @cmd('buffers')
-def _(editor):
+def buffer_list(editor):
     """
     List all buffers.
     """
@@ -243,7 +243,7 @@ def _buffer(editor, variables, force=False):
 
 @cmd('bw', accepts_force=True)
 @cmd('bd', accepts_force=True)
-def _(editor, force=False):
+def buffer_wipe(editor, force=False):
     """
     Wipe buffer.
     """
@@ -258,7 +258,7 @@ def _(editor, force=False):
 @location_cmd('open', accepts_force=True)
 @location_cmd('e', accepts_force=True)
 @location_cmd('edit', accepts_force=True)
-def _(editor, location, force=False):
+def buffer_edit(editor, location, force=False):
     """
     Edit new buffer.
     """
@@ -298,7 +298,7 @@ def quit(editor, all_=False, force=False):
 
 @cmd('qa', accepts_force=True)
 @cmd('qall', accepts_force=True)
-def _(editor, force=False):
+def quit_all(editor, force=False):
     """
     Quit all.
     """
@@ -322,7 +322,7 @@ def write(editor, location, force=False):
 
 
 @location_cmd('wq', accepts_force=True)
-def _(editor, location, force=False):
+def write_and_quit(editor, location, force=False):
     """
     Write file and quit.
     """
@@ -331,7 +331,7 @@ def _(editor, location, force=False):
 
 
 @cmd('cq')
-def _(editor):
+def quit_nonzero(editor):
     """
     Quit with non zero exit status.
     """
@@ -342,7 +342,7 @@ def _(editor):
 
 
 @cmd('wqa')
-def _(editor):
+def write_and_quit_all(editor):
     """
     Write current buffer and quit all.
     """
@@ -356,7 +356,7 @@ def _(editor):
 
 @cmd('h')
 @cmd('help')
-def _(editor):
+def help(editor):
     """
     Show help.
     """
@@ -364,7 +364,7 @@ def _(editor):
 
 
 @location_cmd('tabnew')
-def _(editor, location):
+def tab_new(editor, location):
     """
     Create new tab page.
     """
@@ -372,7 +372,7 @@ def _(editor, location):
 
 
 @cmd('tabclose')
-def _(editor):
+def tab_close(editor):
     """
     Close tab page.
     """
@@ -380,7 +380,7 @@ def _(editor):
 
 
 @cmd('tabnext')
-def _(editor):
+def tab_next(editor):
     """
     Go to next tab.
     """
@@ -388,7 +388,7 @@ def _(editor):
 
 
 @cmd('tabprevious')
-def _(editor):
+def tab_previous(editor):
     """
     Go to previous tab.
     """
@@ -396,7 +396,7 @@ def _(editor):
 
 
 @_cmd('colorscheme')
-def _(editor, variables):
+def color_scheme(editor, variables):
     """
     Go to one of the open buffers.
     """
@@ -407,85 +407,85 @@ def _(editor, variables):
 
 @set_cmd('nu')
 @set_cmd('number')
-def _(editor):
+def line_numbers_show(editor):
     """ Show line numbers.  """
     editor.show_line_numbers = True
 
 
 @set_cmd('nonu')
 @set_cmd('nonumber')
-def _(editor):
+def line_numbers_hide(editor):
     """ Hide line numbers. """
     editor.show_line_numbers = False
 
 
 @set_cmd('hlsearch')
-def _(editor):
+def search_highlight(editor):
     """ Highlight search matches. """
     editor.highlight_search = True
 
 
 @set_cmd('nohlsearch')
-def _(editor):
+def search_no_highlight(editor):
     """ Don't highlight search matches. """
     editor.highlight_search = False
 
 
 @set_cmd('paste')
-def _(editor):
+def paste_mode(editor):
     """ Enter paste mode. """
     editor.paste_mode = True
 
 
 @set_cmd('nopaste')
-def _(editor):
+def paste_mode_leave(editor):
     """ Leave paste mode. """
     editor.paste_mode = False
 
 
 @set_cmd('ruler')
-def _(editor):
+def ruler_show(editor):
     """ Show ruler. """
     editor.show_ruler = True
 
 
 @set_cmd('noruler')
-def _(editor):
+def ruler_hide(editor):
     """ Hide ruler. """
     editor.show_ruler = False
 
 
 @set_cmd('wildmenu')
 @set_cmd('wmnu')
-def _(editor):
+def wild_menu_show(editor):
     """ Show wildmenu. """
     editor.show_wildmenu = True
 
 
 @set_cmd('nowildmenu')
 @set_cmd('nowmnu')
-def _(editor):
+def wild_menu_hide(editor):
     """ Hide wildmenu. """
     editor.show_wildmenu = False
 
 
 @set_cmd('expandtab')
 @set_cmd('et')
-def _(editor):
+def tab_expand(editor):
     """ Enable tab expension. """
     editor.expand_tab = True
 
 
 @set_cmd('noexpandtab')
 @set_cmd('noet')
-def _(editor):
+def tab_no_expand(editor):
     """ Disable tab expension. """
     editor.expand_tab = False
 
 
 @set_cmd('tabstop', accepts_value=True)
 @set_cmd('ts', accepts_value=True)
-def _(editor, value):
+def tab_stop(editor, value):
     """
     Set tabstop.
     """
@@ -504,7 +504,7 @@ def _(editor, value):
 
 @set_cmd('scrolloff', accepts_value=True)
 @set_cmd('so', accepts_value=True)
-def _(editor, value):
+def set_scroll_offset(editor, value):
     """
     Set scroll offset.
     """
@@ -522,48 +522,48 @@ def _(editor, value):
 
 
 @set_cmd('incsearch')
-def _(editor):
+def incsearch_enable(editor):
     """ Enable incsearch. """
     editor.incsearch = True
 
 
 @set_cmd('noincsearch')
-def _(editor):
+def incsearch_disable(editor):
     """ Disable incsearch. """
     editor.incsearch = False
 
 
 @set_cmd('ignorecase')
-def _(editor):
+def search_ignorecase(editor):
     """ Enable case insensitive searching. """
     editor.ignore_case = True
 
 
 @set_cmd('noignorecase')
-def _(editor):
+def searc_no_ignorecase(editor):
     """ Disable case insensitive searching. """
     editor.ignore_case = False
 
 
 @set_cmd('list')
-def _(editor):
+def unprintable_show(editor):
     """ Display unprintable characters. """
     editor.display_unprintable_characters = True
 
 
 @set_cmd('nolist')
-def _(editor):
+def unprintable_hide(editor):
     """ Hide unprintable characters. """
     editor.display_unprintable_characters = False
 
 
 @set_cmd('jedi')
-def _(editor):
+def jedi_enable(editor):
     """ Enable Jedi autocompletion for Python files. """
     editor.enable_jedi = True
 
 
 @set_cmd('nojedi')
-def _(editor):
+def jedi_disable(editor):
     """ Disable Jedi autocompletion. """
     editor.enable_jedi = False
