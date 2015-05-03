@@ -79,6 +79,11 @@ class EditorBuffer(object):
                     self.is_new = False
                     try:
                         text, self.encoding = io.read(location)
+
+                        # Drop trailing newline while editing.
+                        # (prompt-toolkit doesn't enforce the trailing newline.)
+                        if text.endswith('\n'):
+                            text = text[:-1]
                     except Exception as e:
                         self.editor.show_message('Cannot read %r: %r' % (location, e))
                         return ''
@@ -120,7 +125,7 @@ class EditorBuffer(object):
 
         # Write it.
         try:
-            io.write(self.location, self.buffer.text, self.encoding)
+            io.write(self.location, self.buffer.text + '\n', self.encoding)
             self.is_new = False
         except Exception as e:
             # E.g. "No such file or directory."
