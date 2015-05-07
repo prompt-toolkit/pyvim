@@ -1,6 +1,24 @@
 CHANGELOG
 =========
 
+0.0.3: 2015-05-07
+-----------------
+
+New features:
+- shortcuts for split and vsplit.
+- Page up/down key bindings.
+- ControlW n/v key bindings for splitting windows.
+- Custom I/O backends. (For opening of .gz files and http:// urls.)
+- Implemented ControlE/ControlY/ControlD/ControlU for scrolling.
+- Implemented scroll offset.
+- Added :bd, :cq and :open
+- Better handling of exclamation mark in commands.
+
+Bug fixes:
+- NameErrors in .pyvimrc example.
+- ControlF shortcut.
+- Solves :q issue.
+- Fixed ControlT
 
 0.0.2: 2015-04-26
 -----------------

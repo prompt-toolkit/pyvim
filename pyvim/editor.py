@@ -10,7 +10,7 @@ Usage::
 from __future__ import unicode_literals
 
 from prompt_toolkit.buffer import Buffer, AcceptAction
-from prompt_toolkit.contrib.shortcuts import create_eventloop
+from prompt_toolkit.shortcuts import create_eventloop
 from prompt_toolkit.enums import SEARCH_BUFFER
 from prompt_toolkit.filters import Always, Condition
 from prompt_toolkit.history import FileHistory
