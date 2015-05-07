@@ -5,7 +5,7 @@ A pyvim configuration file is just a Python file that contains a global
 `configure` function. During startup, that function will be called with the
 editor instance as an argument.
 """
-from __future__ import unicode_literals
+from __future__ import unicode_literals, print_function
 
 from .editor import Editor
 
