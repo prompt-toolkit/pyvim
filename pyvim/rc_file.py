@@ -41,10 +41,10 @@ def run_rc_file(editor, rc_file):
     # Run the rc file in an empty namespace.
     try:
         namespace = {}
-        if os.path.exists(rc_file):
-            with open(rc_file, 'r') as f:
-                code = compile(f.read(), rc_file, 'exec')
-                six.exec_(code, namespace, namespace)
+
+        with open(rc_file, 'r') as f:
+            code = compile(f.read(), rc_file, 'exec')
+            six.exec_(code, namespace, namespace)
 
         # Now we should have a 'configure' method in this namespace. We call this
         # method with editor as an argument.

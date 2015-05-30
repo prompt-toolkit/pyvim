@@ -19,7 +19,7 @@ class CommandPreviewer(object):
         """
         e = self.editor
 
-        self._style = e.cli.style
+        self._style = e.application.style
         self._show_line_numbers = e.show_line_numbers
         self._highlight_search = e.highlight_search
         self._show_ruler = e.show_ruler
@@ -30,7 +30,7 @@ class CommandPreviewer(object):
         """
         e = self.editor
 
-        e.cli.style = self._style
+        e.application.style = self._style
         e.show_line_numbers = self._show_line_numbers
         e.highlight_search = self._highlight_search
         e.show_ruler = self._show_ruler

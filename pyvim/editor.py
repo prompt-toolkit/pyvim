@@ -9,13 +9,15 @@ Usage::
 """
 from __future__ import unicode_literals
 
+from prompt_toolkit.application import Application, AbortAction
 from prompt_toolkit.buffer import Buffer, AcceptAction
-from prompt_toolkit.shortcuts import create_eventloop
 from prompt_toolkit.enums import SEARCH_BUFFER
 from prompt_toolkit.filters import Always, Condition
 from prompt_toolkit.history import FileHistory
-from prompt_toolkit.interface import CommandLineInterface, AbortAction
+from prompt_toolkit.interface import CommandLineInterface
 from prompt_toolkit.key_binding.vi_state import InputMode
+from prompt_toolkit.shortcuts import create_eventloop
+from prompt_toolkit.utils import Callback
 
 from .commands.completer import create_command_completer
 from .commands.handler import handle_command
@@ -86,15 +88,16 @@ class Editor(object):
         # Create layout and CommandLineInterface instance.
         self.editor_layout = EditorLayout(
             self, self.key_bindings_manager, self.window_arrangement)
-        self.cli = self._create_cli()
+        self.application = self._create_application()
+
+        self.cli = CommandLineInterface(
+            eventloop=self.eventloop,
+            application=self.application)
 
         # Hide message when a key is pressed.
         def key_pressed():
             self.message = None
         self.cli.input_processor.beforeKeyPress += key_pressed
-
-        # Call reporter when input changes.
-        self.cli.onBufferChanged += self._current_buffer_changed
 
         # Command line previewer.
         self.previewer = CommandPreviewer(self)
@@ -126,7 +129,7 @@ class Editor(object):
         if locations and len(locations) > 1:
             self.show_message('%i files loaded.' % len(locations))
 
-    def _create_cli(self):
+    def _create_application(self):
         """
         Create CommandLineInterface instance.
         """
@@ -154,9 +157,10 @@ class Editor(object):
                                enable_history_search=Always(),
                                accept_action=AcceptAction.IGNORE)
 
+        # Create app.
+
         # Create CLI.
-        cli = CommandLineInterface(
-            eventloop=self.eventloop,
+        application = Application(
             layout=self.editor_layout.layout,
             key_bindings_registry=self.key_bindings_manager.registry,
             buffers={
@@ -168,17 +172,18 @@ class Editor(object):
             ignore_case=Condition(lambda cli: self.ignore_case),
             use_alternate_screen=True,
             on_abort=AbortAction.IGNORE,
-            on_exit=AbortAction.IGNORE)
+            on_exit=AbortAction.IGNORE,
+            on_buffer_changed=Callback(self._current_buffer_changed))
 
         # Handle command line previews.
         # (e.g. when typing ':colorscheme blue', it should already show the
         # preview before pressing enter.)
         def preview():
-            if cli.current_buffer == command_buffer:
+            if self.cli.current_buffer == command_buffer:
                 self.previewer.preview(command_buffer.text)
-        command_buffer.onTextChanged += preview
+        command_buffer.on_text_changed += preview
 
-        return cli
+        return application
 
     @property
     def current_editor_buffer(self):
@@ -214,7 +219,7 @@ class Editor(object):
         except pygments.util.ClassNotFound:
             pass
         else:
-            self.cli.style = style
+            self.application.style = style
 
     def sync_with_prompt_toolkit(self):
         """
@@ -229,7 +234,7 @@ class Editor(object):
         self.cli.focus_stack._stack = [
             self.window_arrangement.active_editor_buffer.buffer_name]
 
-    def _current_buffer_changed(self):
+    def _current_buffer_changed(self, cli):
         """
         Current buffer changed.
         """
@@ -274,7 +279,7 @@ class Editor(object):
                         self.cli._redraw()
                     else:
                         # Restart reporter when the text was changed.
-                        self._current_buffer_changed()
+                        self._current_buffer_changed(self.cli)
 
                 self.cli.eventloop.call_from_executor(ready)
             self.cli.eventloop.run_in_executor(in_executor)
@@ -295,7 +300,7 @@ class Editor(object):
         self.sync_with_prompt_toolkit()
 
         # Run eventloop of prompt_toolkit.
-        self.cli.read_input(reset_current_buffer=False)
+        self.cli.run(reset_current_buffer=False)
 
     def enter_command_mode(self):
         """

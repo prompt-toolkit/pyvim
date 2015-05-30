@@ -80,6 +80,9 @@ class EditorBuffer(object):
                     try:
                         text, self.encoding = io.read(location)
 
+                        # Replace \r\n by \n.
+                        text = text.replace('\r\n', '\n')
+
                         # Drop trailing newline while editing.
                         # (prompt-toolkit doesn't enforce the trailing newline.)
                         if text.endswith('\n'):

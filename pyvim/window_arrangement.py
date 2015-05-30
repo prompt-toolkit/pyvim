@@ -458,7 +458,7 @@ class WindowArrangement(object):
 
         # Remove empty/new buffers that are hidden.
         for eb in self.editor_buffers[:]:
-            if eb.is_new and eb not in ebs and eb.buffer.text == '':
+            if eb.is_new and not eb.location and eb not in ebs and eb.buffer.text == '':
                 self.editor_buffers.remove(eb)
 
     def close_buffer(self):
