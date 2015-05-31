@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+0.0.4: 2015-05-31
+-----------------
+
+New features:
+- Upgrade to prompt_toolkit==0.38:
+  Several new key bindings bug fixes and faster pasting.
+
 0.0.3: 2015-05-07
 -----------------
 
