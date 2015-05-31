@@ -30,7 +30,7 @@ def create_key_bindings(editor):
     the ones which are specific for the editor.
     """
     # Create new Key binding manager.
-    manager = KeyBindingManager(enable_vi_mode=Always(), enable_system_prompt=Always())
+    manager = KeyBindingManager(enable_vi_mode=Always(), enable_system_bindings=Always())
     manager.vi_state.input_mode = InputMode.NAVIGATION
 
     # Filters.
