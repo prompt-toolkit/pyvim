@@ -8,6 +8,7 @@ from pygments.styles import get_all_styles, get_style_by_name
 from pygments.token import Token
 
 __all__ = (
+    'generate_built_in_styles',
     'get_editor_style_by_name',
 )
 

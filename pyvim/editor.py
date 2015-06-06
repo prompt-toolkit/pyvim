@@ -70,6 +70,7 @@ class Editor(object):
 
         # Load styles. (Mapping from name to Style class.)
         self.styles = generate_built_in_styles()
+        self.current_style = get_editor_style_by_name('default')
 
         # I/O backends.
         self.io_backends = [
@@ -167,7 +168,7 @@ class Editor(object):
                 COMMAND_BUFFER: command_buffer,
                 SEARCH_BUFFER: search_buffer,
             },
-            style=get_editor_style_by_name('default'),
+            get_style=lambda: self.current_style,
             paste_mode=Condition(lambda cli: self.paste_mode),
             ignore_case=Condition(lambda cli: self.ignore_case),
             use_alternate_screen=True,
@@ -215,11 +216,9 @@ class Editor(object):
         Apply new colorscheme. (By name.)
         """
         try:
-            style = get_editor_style_by_name(name)
+            self.current_style = get_editor_style_by_name(name)
         except pygments.util.ClassNotFound:
             pass
-        else:
-            self.application.style = style
 
     def sync_with_prompt_toolkit(self):
         """
