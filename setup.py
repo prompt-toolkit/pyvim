@@ -21,8 +21,8 @@ setup(
     long_description=long_description,
     packages=find_packages('.'),
     install_requires = [
-        'prompt-toolkit==0.44',
-        'ptpython==0.19',  # For the Python completion (with Jedi.)
+        'prompt-toolkit==0.45',
+        'ptpython==0.20',  # For the Python completion (with Jedi.)
         'pyflakes',        # For Python error reporting.
         'docopt',          # For command line arguments.
     ],
