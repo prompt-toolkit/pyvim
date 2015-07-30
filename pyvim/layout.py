@@ -10,7 +10,7 @@ from prompt_toolkit.layout.controls import BufferControl, FillControl
 from prompt_toolkit.layout.controls import TokenListControl
 from prompt_toolkit.layout.dimension import LayoutDimension
 from prompt_toolkit.layout.menus import CompletionsMenu
-from prompt_toolkit.layout.processors import Processor, HighlightSearchProcessor, HighlightSelectionProcessor, HighlightMatchingBracketProcessor, ConditionalProcessor, BeforeInput
+from prompt_toolkit.layout.processors import Processor, HighlightSearchProcessor, HighlightSelectionProcessor, HighlightMatchingBracketProcessor, ConditionalProcessor, BeforeInput, ShowTrailingWhiteSpaceProcessor
 from prompt_toolkit.layout.screen import Char
 from prompt_toolkit.layout.toolbars import TokenListToolbar, SystemToolbar, SearchToolbar, ValidationToolbar, CompletionsToolbar
 from prompt_toolkit.selection import SelectionType
@@ -372,6 +372,7 @@ class EditorLayout(object):
             floats=[
                 Float(xcursor=True, ycursor=True,
                       content=CompletionsMenu(max_height=12,
+                                              scroll_offset=2,
                                               extra_filter=~HasFocus(COMMAND_BUFFER))),
                 Float(content=BufferListOverlay(editor), bottom=1, left=0),
                 Float(bottom=1, left=0, right=0, height=1,
@@ -518,30 +519,6 @@ class ReportingProcessor(Processor):
     def invalidation_hash(self, cli, document):
         return (self.editor_buffer.report_errors, )
 
-
-class ShowTrailingWhiteSpaceProcessor(Processor):
-    """
-    Make trailing whitespace visible.
-    """
-    def __init__(self, token=Token.TrailingWhiteSpace, char='\xb7'):
-        self.token = token
-        self.char = char
-
-    def run(self, cli, document, tokens):
-        # Walk backwards through all te tokens.
-        t = (self.token, self.char)
-        is_end_of_line = True
-
-        for i in range(len(tokens) - 1, -1, -1):
-            char = tokens[i][1]
-            if is_end_of_line and char == ' ':
-                tokens[i] = t
-            elif char == '\n':
-                is_end_of_line = True
-            else:
-                is_end_of_line = False
-
-        return tokens, lambda i: i
 
 
 class TabsProcessor(Processor):
