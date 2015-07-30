@@ -1,6 +1,15 @@
 CHANGELOG
 =========
 
+0.0.6: 2015-06-30
+-----------------
+
+Upgrade to prompt_toolkit==0.44 and ptpython==0.19.
+
+New features:
+- Added __main__: allow "python -m pyvim".
+
+
 0.0.5: 2015-06-22
 -----------------
 
