@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from prompt_toolkit.filters import HasFocus, HasSearch, Condition, HasArg, Always
 from prompt_toolkit.key_binding.vi_state import InputMode
 from prompt_toolkit.layout import HSplit, VSplit, FloatContainer, Float
-from prompt_toolkit.layout.containers import Window
+from prompt_toolkit.layout.containers import Window, ConditionalContainer
 from prompt_toolkit.layout.controls import BufferControl, FillControl
 from prompt_toolkit.layout.controls import TokenListControl
 from prompt_toolkit.layout.dimension import LayoutDimension
@@ -63,29 +63,29 @@ class TabsControl(TokenListControl):
         super(TabsControl, self).__init__(get_tokens, Char(token=Token.TabBar))
 
 
-class TabsToolbar(Window):
+class TabsToolbar(ConditionalContainer):
     def __init__(self, editor):
         super(TabsToolbar, self).__init__(
-            TabsControl(editor),
-            height=LayoutDimension.exact(1),
+            Window(TabsControl(editor), height=LayoutDimension.exact(1)),
             filter=Condition(lambda cli: len(editor.window_arrangement.tab_pages) > 1))
 
 
-class CommandLine(Window):
+class CommandLine(ConditionalContainer):
     """
     The editor command line. (For at the bottom of the screen.)
     """
     def __init__(self):
         super(CommandLine, self).__init__(
-            BufferControl(
-                buffer_name=COMMAND_BUFFER,
-                input_processors=[BeforeInput.static(':')],
-                lexer=create_command_lexer()),
-            height=LayoutDimension.exact(1),
+            Window(
+                BufferControl(
+                    buffer_name=COMMAND_BUFFER,
+                    input_processors=[BeforeInput.static(':')],
+                    lexer=create_command_lexer()),
+                height=LayoutDimension.exact(1)),
             filter=HasFocus(COMMAND_BUFFER))
 
 
-class WelcomeMessageWindow(Window):
+class WelcomeMessageWindow(ConditionalContainer):
     """
     Welcome message pop-up, which is shown during start-up when no other files
     were opened.
@@ -106,7 +106,7 @@ class WelcomeMessageWindow(Window):
             return result
 
         super(WelcomeMessageWindow, self).__init__(
-            TokenListControl(lambda cli: WELCOME_MESSAGE_TOKENS),
+            Window(TokenListControl(lambda cli: WELCOME_MESSAGE_TOKENS)),
             filter=Condition(condition))
 
 
@@ -122,7 +122,7 @@ def _bufferlist_overlay_visible_condition(cli):
 bufferlist_overlay_visible_filter = Condition(_bufferlist_overlay_visible_condition)
 
 
-class BufferListOverlay(Window):
+class BufferListOverlay(ConditionalContainer):
     """
     Floating window that shows the list of buffers when we are typing ':b'
     inside the vim command line.
@@ -212,8 +212,8 @@ class BufferListOverlay(Window):
                 return result
 
         super(BufferListOverlay, self).__init__(
-                TokenListControl(get_tokens, default_char=Char(token=token)),
-                filter=bufferlist_overlay_visible_filter)
+            Window(TokenListControl(get_tokens, default_char=Char(token=token))),
+            filter=bufferlist_overlay_visible_filter)
 
 
 class MessageToolbarBar(TokenListToolbar):
@@ -293,7 +293,7 @@ class WindowStatusBar(TokenListToolbar):
         super(WindowStatusBar, self).__init__(get_tokens, default_char=Char(' ', Token.Toolbar))
 
 
-class WindowStatusBarRuler(Window):
+class WindowStatusBarRuler(ConditionalContainer):
     """
     The right side of the Vim toolbar, showing the location of the cursor in
     the file, and the vectical scroll percentage.
@@ -327,13 +327,14 @@ class WindowStatusBarRuler(Window):
             ]
 
         super(WindowStatusBarRuler, self).__init__(
-            TokenListControl(get_tokens, default_char=Char(' ', Token.Toolbar), align_right=True),
-            height=LayoutDimension.exact(1),
-            width=LayoutDimension.exact(15),
+            Window(
+                TokenListControl(get_tokens, default_char=Char(' ', Token.Toolbar), align_right=True),
+                height=LayoutDimension.exact(1),
+                width=LayoutDimension.exact(15)),
             filter=Condition(lambda cli: editor.show_ruler))
 
 
-class SimpleArgToolbar(Window):
+class SimpleArgToolbar(ConditionalContainer):
     """
     Simple control showing the Vi repeat arg.
     """
@@ -345,7 +346,8 @@ class SimpleArgToolbar(Window):
                 return []
 
         super(SimpleArgToolbar, self).__init__(
-            TokenListControl(get_tokens, align_right=True), filter=HasArg()),
+            Window(TokenListControl(get_tokens, align_right=True)),
+            filter=HasArg()),
 
 
 class EditorLayout(object):
