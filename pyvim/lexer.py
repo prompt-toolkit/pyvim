@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from prompt_toolkit.layout.lexers import Lexer
 from pygments.lexers import get_lexer_for_filename
 from pygments.token import Token
 from pygments.util import ClassNotFound
@@ -9,21 +10,14 @@ __all__ = (
 )
 
 
-class DocumentLexer(object):
+class DocumentLexer(Lexer):
     """
     Lexer that depending on the filetype, uses another pygments lexer.
     """
     def __init__(self, editor_buffer):
         self.editor_buffer = editor_buffer
 
-    def __call__(self, stripnl=False, stripall=False, ensurenl=False):
-        """
-        For compatibility with a Pygments lexer class. (We use an instance of
-        this as if it were such a class.)
-        """
-        return self
-
-    def get_tokens(self, text):
+    def get_tokens(self, cli, text):
         """
         Call the lexer and return the tokens.
         """

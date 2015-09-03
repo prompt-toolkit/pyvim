@@ -8,6 +8,7 @@ from prompt_toolkit.layout import HSplit, VSplit, FloatContainer, Float
 from prompt_toolkit.layout.containers import Window, ConditionalContainer
 from prompt_toolkit.layout.controls import BufferControl, FillControl
 from prompt_toolkit.layout.controls import TokenListControl
+from prompt_toolkit.layout.margins import ConditionalMargin, NumberredMargin
 from prompt_toolkit.layout.dimension import LayoutDimension
 from prompt_toolkit.layout.menus import CompletionsMenu
 from prompt_toolkit.layout.processors import Processor, HighlightSearchProcessor, HighlightSelectionProcessor, HighlightMatchingBracketProcessor, ConditionalProcessor, BeforeInput, ShowTrailingWhiteSpaceProcessor
@@ -495,7 +496,9 @@ class EditorLayout(object):
             # Replace tabs by spaces.
             TabsProcessor(self.editor)]
 
-        return BufferControl(show_line_numbers=Condition(lambda cli: self.editor.show_line_numbers),
+        return BufferControl(margin=ConditionalMargin(
+                                margin=NumberredMargin(),
+                                filter=Condition(lambda cli: self.editor.show_line_numbers)),
                              lexer=DocumentLexer(editor_buffer),
                              input_processors=input_processors,
                              buffer_name=buffer_name,

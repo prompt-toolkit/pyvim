@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from prompt_toolkit.contrib.regular_languages.lexer import GrammarLexer
+from prompt_toolkit.layout.lexers import PygmentsLexer, SimpleLexer
 
 from pygments.token import Token
 from pygments.lexers import BashLexer
@@ -15,9 +16,8 @@ def create_command_lexer():
     """
     Lexer for highlighting of the command line.
     """
-    return GrammarLexer(COMMAND_GRAMMAR, tokens={
-        'command': Token.CommandLine.Command,
-        'location': Token.CommandLine.Location,
-    }, lexers={
-        'shell_command': BashLexer,
+    return GrammarLexer(COMMAND_GRAMMAR, lexers={
+        'command': SimpleLexer(Token.CommandLine.Command),
+        'location': SimpleLexer(Token.CommandLine.Location),
+        'shell_command': PygmentsLexer(BashLexer),
     })
