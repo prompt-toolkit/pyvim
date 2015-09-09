@@ -512,7 +512,7 @@ class ReportingProcessor(Processor):
     def __init__(self, editor_buffer):
         self.editor_buffer = editor_buffer
 
-    def run(self, cli, document, tokens):
+    def run(self, cli, buffer, tokens):
         if self.editor_buffer.report_errors:
             for error in self.editor_buffer.report_errors:
                 for i in range(error.start_index, error.end_index):
@@ -521,7 +521,7 @@ class ReportingProcessor(Processor):
 
         return tokens, lambda i: i
 
-    def invalidation_hash(self, cli, document):
+    def invalidation_hash(self, cli, buffer):
         return (self.editor_buffer.report_errors, )
 
 
@@ -533,7 +533,7 @@ class TabsProcessor(Processor):
     def __init__(self, editor):
         self.editor = editor
 
-    def run(self, cli, document, tokens):
+    def run(self, cli, buffer, tokens):
         tabstop = self.editor.tabstop
 
         # Create separator for tabs.
@@ -561,5 +561,5 @@ class TabsProcessor(Processor):
 
         return tokens, map_cursor
 
-    def invalidation_hash(self, cli, document):
+    def invalidation_hash(self, cli, buffer):
         return (self.editor.tabstop, )
