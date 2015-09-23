@@ -55,9 +55,12 @@ class Editor(object):
         self.tabstop = 4  # Number of spaces that a tab character represents.
         self.incsearch = True  # Show matches while typing search string.
         self.ignore_case = False  # Ignore case while searching.
+        self.enable_mouse_support = True
         self.display_unprintable_characters = True  # ':set list'
         self.enable_jedi = True  # ':set jedi', for Python Jedi completion.
         self.scroll_offset = 0  # ':set scrolloff'
+        self.relative_number = False  # ':set relativenumber'
+        self.wrap_lines = True  # ':set wrap'
 
         # Ensure config directory exists.
         self.config_directory = os.path.abspath(os.path.expanduser(config_directory))
@@ -171,6 +174,7 @@ class Editor(object):
             get_style=lambda: self.current_style,
             paste_mode=Condition(lambda cli: self.paste_mode),
             ignore_case=Condition(lambda cli: self.ignore_case),
+            mouse_support=Condition(lambda cli: self.enable_mouse_support),
             use_alternate_screen=True,
             on_abort=AbortAction.IGNORE,
             on_exit=AbortAction.IGNORE,

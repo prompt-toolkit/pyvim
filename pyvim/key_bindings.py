@@ -75,7 +75,7 @@ def create_key_bindings(editor):
         # Restore cursor.
         b.cursor_position -= pos
 
-    @handle(Keys.ControlR, filter=in_navigation_mode, save_before=False)
+    @handle(Keys.ControlR, filter=in_navigation_mode, save_before=(lambda e: False))
     def redo(event):
         """
         Redo.

@@ -567,3 +567,27 @@ def jedi_enable(editor):
 def jedi_disable(editor):
     """ Disable Jedi autocompletion. """
     editor.enable_jedi = False
+
+
+@set_cmd('relativenumber')
+def relative_number(editor):
+    " Enable relative number "
+    editor.relative_number = True
+
+
+@set_cmd('norelativenumber')
+def no_relative_number(editor):
+    " Disable relative number "
+    editor.relative_number = False
+
+
+@set_cmd('wrap')
+def enable_wrap(editor):
+    " Enable line wrapping. "
+    editor.wrap_lines = True
+
+
+@set_cmd('nowrap')
+def disable_wrap(editor):
+    " disable line wrapping. "
+    editor.wrap_lines = False

@@ -23,6 +23,7 @@ class CommandPreviewer(object):
         self._show_line_numbers = e.show_line_numbers
         self._highlight_search = e.highlight_search
         self._show_ruler = e.show_ruler
+        self._relative_number = e.relative_number
 
     def restore(self):
         """
@@ -34,6 +35,7 @@ class CommandPreviewer(object):
         e.show_line_numbers = self._show_line_numbers
         e.highlight_search = self._highlight_search
         e.show_ruler = self._show_ruler
+        e.relative_number = self._relative_number
 
     def preview(self, input_string):
         """
@@ -77,3 +79,7 @@ class CommandPreviewer(object):
                 e.show_ruler = True
             elif set_option == 'noruler':
                 e.show_ruler = False
+            elif set_option == 'relativenumber':
+                e.relative_number = True
+            elif set_option == 'norelativenumber':
+                e.relative_number = False

@@ -5,17 +5,16 @@ from __future__ import unicode_literals
 from prompt_toolkit.filters import HasFocus, HasSearch, Condition, HasArg, Always
 from prompt_toolkit.key_binding.vi_state import InputMode
 from prompt_toolkit.layout import HSplit, VSplit, FloatContainer, Float
-from prompt_toolkit.layout.containers import Window, ConditionalContainer
+from prompt_toolkit.layout.containers import Window, ConditionalContainer, ScrollOffsets
 from prompt_toolkit.layout.controls import BufferControl, FillControl
 from prompt_toolkit.layout.controls import TokenListControl
 from prompt_toolkit.layout.margins import ConditionalMargin, NumberredMargin
 from prompt_toolkit.layout.dimension import LayoutDimension
 from prompt_toolkit.layout.menus import CompletionsMenu
-from prompt_toolkit.layout.processors import Processor, HighlightSearchProcessor, HighlightSelectionProcessor, HighlightMatchingBracketProcessor, ConditionalProcessor, BeforeInput, ShowTrailingWhiteSpaceProcessor
+from prompt_toolkit.layout.processors import Processor, HighlightSearchProcessor, HighlightSelectionProcessor, HighlightMatchingBracketProcessor, ConditionalProcessor, BeforeInput, ShowTrailingWhiteSpaceProcessor, Transformation
 from prompt_toolkit.layout.screen import Char
 from prompt_toolkit.layout.toolbars import TokenListToolbar, SystemToolbar, SearchToolbar, ValidationToolbar, CompletionsToolbar
 from prompt_toolkit.selection import SelectionType
-from prompt_toolkit.reactive import Integer
 
 from pygments.token import Token
 
@@ -351,6 +350,21 @@ class SimpleArgToolbar(ConditionalContainer):
             filter=HasArg()),
 
 
+class PyvimScrollOffsets(ScrollOffsets):
+    def __init__(self, editor):
+        self.editor = editor
+        self.left = 0
+        self.right = 0
+
+    @property
+    def top(self):
+        return self.editor.scroll_offset
+
+    @property
+    def bottom(self):
+        return self.editor.scroll_offset
+
+
 class EditorLayout(object):
     """
     The main layout class.
@@ -446,12 +460,15 @@ class EditorLayout(object):
         """
         Create a Window for the buffer, with underneat a status bar.
         """
-        # Pass `Editor.scroll_offset` by reference.
-        scroll_offset = Integer.from_callable(lambda: self.editor.scroll_offset)
-
         window = Window(self._create_buffer_control(editor_buffer),
                         allow_scroll_beyond_bottom=Always(),
-                        scroll_offset=scroll_offset)
+                        scroll_offsets=PyvimScrollOffsets(self.editor),
+                        left_margins=[ConditionalMargin(
+                                margin=NumberredMargin(
+                                    buffer_name=editor_buffer.buffer_name,
+                                    relative=Condition(lambda cli: self.editor.relative_number)),
+                                filter=Condition(lambda cli: self.editor.show_line_numbers))])
+
 
         return HSplit([
             window,
@@ -470,6 +487,10 @@ class EditorLayout(object):
         @Condition
         def preview_search(cli):
             return self.editor.incsearch
+
+        @Condition
+        def wrap_lines(cli):
+            return self.editor.wrap_lines
 
         input_processors = [
             # Highlighting of the search.
@@ -496,13 +517,11 @@ class EditorLayout(object):
             # Replace tabs by spaces.
             TabsProcessor(self.editor)]
 
-        return BufferControl(margin=ConditionalMargin(
-                                margin=NumberredMargin(),
-                                filter=Condition(lambda cli: self.editor.show_line_numbers)),
-                             lexer=DocumentLexer(editor_buffer),
+        return BufferControl(lexer=DocumentLexer(editor_buffer),
                              input_processors=input_processors,
                              buffer_name=buffer_name,
-                             preview_search=preview_search)
+                             preview_search=preview_search,
+                             wrap_lines=wrap_lines)
 
 
 class ReportingProcessor(Processor):
@@ -512,16 +531,16 @@ class ReportingProcessor(Processor):
     def __init__(self, editor_buffer):
         self.editor_buffer = editor_buffer
 
-    def run(self, cli, buffer, tokens):
+    def apply_transformation(self, cli, document, tokens):
         if self.editor_buffer.report_errors:
             for error in self.editor_buffer.report_errors:
                 for i in range(error.start_index, error.end_index):
                     if i < len(tokens):
                         tokens[i] = (Token.FlakesError, tokens[i][1])
 
-        return tokens, lambda i: i
+        return Transformation(document, tokens)
 
-    def invalidation_hash(self, cli, buffer):
+    def invalidation_hash(self, cli, document):
         return (self.editor_buffer.report_errors, )
 
 
@@ -533,7 +552,7 @@ class TabsProcessor(Processor):
     def __init__(self, editor):
         self.editor = editor
 
-    def run(self, cli, buffer, tokens):
+    def apply_transformation(self, cli, document, tokens):
         tabstop = self.editor.tabstop
 
         # Create separator for tabs.
@@ -554,12 +573,19 @@ class TabsProcessor(Processor):
                 positions.add(i-1)
                 tokens[i] = (token or tokens[i][0], separator)
 
-        def map_cursor(from_position):
+        def source_to_display(from_position):
             """ Maps original cursor position to the new one. """
             count = len(list(p for p in positions if p < from_position -1))
             return from_position + count * (tabstop - 1)
 
-        return tokens, map_cursor
+        def display_to_source(display_pos):
+            return display_pos  # XXX
 
-    def invalidation_hash(self, cli, buffer):
+        return Transformation(
+                document,
+                tokens,
+                source_to_display=source_to_display,
+                display_to_source=display_to_source)
+
+    def invalidation_hash(self, cli, document):
         return (self.editor.tabstop, )
