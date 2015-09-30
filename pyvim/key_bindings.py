@@ -32,6 +32,7 @@ def create_key_bindings(editor):
     # Create new Key binding manager.
     manager = KeyBindingManager(
         enable_vi_mode=Always(),
+        enable_search=True,
         enable_extra_page_navigation=Always(),
         enable_system_bindings=Always())
     manager.vi_state.input_mode = InputMode.NAVIGATION
