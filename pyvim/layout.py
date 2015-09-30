@@ -283,14 +283,14 @@ class WindowStatusBar(TokenListToolbar):
                 return '                     '
 
             return [
-                (Token.Toolbar, ' '),
-                (Token.Toolbar, editor_buffer.location or ''),
-                (Token.Toolbar, ' [New File]' if editor_buffer.is_new else ''),
-                (Token.Toolbar, '*' if editor_buffer.has_unsaved_changes else ''),
-                (Token.Toolbar, ' '),
-                (Token.Toolbar, mode()),
+                (Token.Toolbar.Status, ' '),
+                (Token.Toolbar.Status, editor_buffer.location or ''),
+                (Token.Toolbar.Status, ' [New File]' if editor_buffer.is_new else ''),
+                (Token.Toolbar.Status, '*' if editor_buffer.has_unsaved_changes else ''),
+                (Token.Toolbar.Status, ' '),
+                (Token.Toolbar.Status, mode()),
             ]
-        super(WindowStatusBar, self).__init__(get_tokens, default_char=Char(' ', Token.Toolbar))
+        super(WindowStatusBar, self).__init__(get_tokens, default_char=Char(' ', Token.Toolbar.Status))
 
 
 class WindowStatusBarRuler(ConditionalContainer):
@@ -319,16 +319,16 @@ class WindowStatusBarRuler(ConditionalContainer):
             main_document = cli.buffers[buffer_name].document
 
             return [
-                (Token.Toolbar.CursorPosition, '(%i,%i)' % (main_document.cursor_position_row + 1,
+                (Token.Toolbar.Status.CursorPosition, '(%i,%i)' % (main_document.cursor_position_row + 1,
                                                             main_document.cursor_position_col + 1)),
-                (Token.Toolbar, ' - '),
-                (Token.Toolbar.Percentage, get_scroll_text()),
-                (Token.Toolbar, ' '),
+                (Token.Toolbar.Status, ' - '),
+                (Token.Toolbar.Status.Percentage, get_scroll_text()),
+                (Token.Toolbar.Status, ' '),
             ]
 
         super(WindowStatusBarRuler, self).__init__(
             Window(
-                TokenListControl(get_tokens, default_char=Char(' ', Token.Toolbar), align_right=True),
+                TokenListControl(get_tokens, default_char=Char(' ', Token.Toolbar.Status), align_right=True),
                 height=LayoutDimension.exact(1),
                 width=LayoutDimension.exact(15)),
             filter=Condition(lambda cli: editor.show_ruler))

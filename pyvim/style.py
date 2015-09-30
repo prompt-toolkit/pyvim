@@ -39,10 +39,9 @@ def generate_built_in_styles():
 
 style_extensions = {
     # Toolbar colors.
-    Token.Toolbar:                '#ffffff bg:#444444',
-    Token.Toolbar.CursorPosition: '#bbffbb bg:#444444',
-    Token.Toolbar.Percentage:     '#ffbbbb bg:#444444',
-    Token.Header:                 '#ffffff bg:#662222',
+    Token.Toolbar.Status:                '#ffffff bg:#444444',
+    Token.Toolbar.Status.CursorPosition: '#bbffbb bg:#444444',
+    Token.Toolbar.Status.Percentage:     '#ffbbbb bg:#444444',
 
     # Flakes color.
     Token.FlakesError:            'bg:#ff4444 #ffffff',
