@@ -18,6 +18,7 @@ from prompt_toolkit.interface import CommandLineInterface
 from prompt_toolkit.key_binding.vi_state import InputMode
 from prompt_toolkit.shortcuts import create_eventloop
 from prompt_toolkit.utils import Callback
+from prompt_toolkit.styles import DynamicStyle, PygmentsStyle
 
 from .commands.completer import create_command_completer
 from .commands.handler import handle_command
@@ -171,7 +172,7 @@ class Editor(object):
                 COMMAND_BUFFER: command_buffer,
                 SEARCH_BUFFER: search_buffer,
             },
-            get_style=lambda: self.current_style,
+            style=DynamicStyle(lambda: PygmentsStyle(self.current_style)),
             paste_mode=Condition(lambda cli: self.paste_mode),
             ignore_case=Condition(lambda cli: self.ignore_case),
             mouse_support=Condition(lambda cli: self.enable_mouse_support),
