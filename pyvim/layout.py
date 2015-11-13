@@ -29,6 +29,7 @@ import re
 
 __all__ = (
     'EditorLayout',
+    'get_terminal_title',
 )
 
 
@@ -589,3 +590,15 @@ class TabsProcessor(Processor):
 
     def invalidation_hash(self, cli, document):
         return (self.editor.tabstop, )
+
+
+def get_terminal_title(editor):
+    """
+    Return the terminal title,
+    e.g.: "filename.py (/directory) - Pyvim"
+    """
+    eb = editor.current_editor_buffer
+    if eb is not None:
+        return '%s - Pyvim' % (eb.location or '[New file]', )
+    else:
+        return 'Pyvim'

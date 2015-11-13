@@ -27,7 +27,7 @@ from .editor_buffer import EditorBuffer
 from .enums import COMMAND_BUFFER
 from .help import HELP_TEXT
 from .key_bindings import create_key_bindings
-from .layout import EditorLayout
+from .layout import EditorLayout, get_terminal_title
 from .reporting import report
 from .style import generate_built_in_styles, get_editor_style_by_name
 from .window_arrangement import WindowArrangement
@@ -168,6 +168,7 @@ class Editor(object):
         application = Application(
             layout=self.editor_layout.layout,
             key_bindings_registry=self.key_bindings_manager.registry,
+            get_title=lambda: get_terminal_title(self),
             buffers={
                 COMMAND_BUFFER: command_buffer,
                 SEARCH_BUFFER: search_buffer,
@@ -196,9 +197,13 @@ class Editor(object):
         """
         Return the `EditorBuffer` that is currently active.
         """
-        for b in self.window_arrangement.editor_buffers:
-            if b.buffer_name == self.cli.current_buffer_name:
-                return b
+        # For each buffer name on the focus stack.
+        for current_buffer_name in [self.cli.current_buffer_name, self.cli.focus_stack.previous]:
+            if current_buffer_name is not None:
+                # Find/return the EditorBuffer with this name.
+                for b in self.window_arrangement.editor_buffers:
+                    if b.buffer_name == current_buffer_name:
+                        return b
 
     @property
     def add_key_binding(self):
