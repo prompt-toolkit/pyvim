@@ -591,3 +591,14 @@ def enable_wrap(editor):
 def disable_wrap(editor):
     " disable line wrapping. "
     editor.wrap_lines = False
+
+@set_cmd('mouse')
+def enable_mouse(editor):
+    " Enable mouse . "
+    editor.enable_mouse_support = True
+
+
+@set_cmd('nomouse')
+def disable_mouse(editor):
+    " disable mouse. "
+    editor.enable_mouse_support = False
