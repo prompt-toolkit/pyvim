@@ -9,7 +9,7 @@ Usage::
 """
 from __future__ import unicode_literals
 
-from prompt_toolkit.application import Application, AbortAction
+from prompt_toolkit.application import Application
 from prompt_toolkit.buffer import Buffer, AcceptAction
 from prompt_toolkit.enums import SEARCH_BUFFER
 from prompt_toolkit.filters import Always, Condition
@@ -178,8 +178,6 @@ class Editor(object):
             ignore_case=Condition(lambda cli: self.ignore_case),
             mouse_support=Condition(lambda cli: self.enable_mouse_support),
             use_alternate_screen=True,
-            on_abort=AbortAction.IGNORE,
-            on_exit=AbortAction.IGNORE,
             on_buffer_changed=Callback(self._current_buffer_changed))
 
         # Handle command line previews.
