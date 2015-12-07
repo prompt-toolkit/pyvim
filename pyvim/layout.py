@@ -8,12 +8,13 @@ from prompt_toolkit.layout import HSplit, VSplit, FloatContainer, Float
 from prompt_toolkit.layout.containers import Window, ConditionalContainer, ScrollOffsets
 from prompt_toolkit.layout.controls import BufferControl, FillControl
 from prompt_toolkit.layout.controls import TokenListControl
-from prompt_toolkit.layout.margins import ConditionalMargin, NumberredMargin
 from prompt_toolkit.layout.dimension import LayoutDimension
+from prompt_toolkit.layout.margins import ConditionalMargin, NumberredMargin
 from prompt_toolkit.layout.menus import CompletionsMenu
 from prompt_toolkit.layout.processors import Processor, HighlightSearchProcessor, HighlightSelectionProcessor, HighlightMatchingBracketProcessor, ConditionalProcessor, BeforeInput, ShowTrailingWhiteSpaceProcessor, Transformation
 from prompt_toolkit.layout.screen import Char
 from prompt_toolkit.layout.toolbars import TokenListToolbar, SystemToolbar, SearchToolbar, ValidationToolbar, CompletionsToolbar
+from prompt_toolkit.mouse_events import MouseEventTypes
 from prompt_toolkit.selection import SelectionType
 
 from pygments.token import Token
@@ -42,6 +43,16 @@ class TabsControl(TokenListControl):
         def location_for_tab(tab):
             return tab.active_window.editor_buffer.get_display_name(short=True)
 
+        def create_tab_handler(index):
+            " Return a mouse handler for this tab. Select the tab on click. "
+            def handler(cli, mouse_event):
+                if mouse_event.event_type == MouseEventTypes.MOUSE_DOWN:
+                    editor.window_arrangement.active_tab_index = index
+                    editor.sync_with_prompt_toolkit()
+                else:
+                    return NotImplemented
+            return handler
+
         def get_tokens(cli):
             selected_tab_index = editor.window_arrangement.active_tab_index
 
@@ -53,10 +64,12 @@ class TabsControl(TokenListControl):
                 if tab.has_unsaved_changes:
                     caption = ' + ' + caption
 
+                handler = create_tab_handler(i)
+
                 if i == selected_tab_index:
-                    append((Token.TabBar.Tab.Active, ' %s ' % caption))
+                    append((Token.TabBar.Tab.Active, ' %s ' % caption, handler))
                 else:
-                    append((Token.TabBar.Tab, ' %s ' % caption))
+                    append((Token.TabBar.Tab, ' %s ' % caption, handler))
                 append((Token.TabBar, ' '))
 
             return result
