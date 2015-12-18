@@ -535,7 +535,8 @@ class EditorLayout(object):
                              input_processors=input_processors,
                              buffer_name=buffer_name,
                              preview_search=preview_search,
-                             wrap_lines=wrap_lines)
+                             wrap_lines=wrap_lines,
+                             focus_on_click=True)
 
 
 class ReportingProcessor(Processor):
