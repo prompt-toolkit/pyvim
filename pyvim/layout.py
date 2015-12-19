@@ -275,8 +275,8 @@ class WindowStatusBar(TokenListToolbar):
     """
     def __init__(self, editor, editor_buffer, manager):
         def get_tokens(cli):
-            insert_mode = manager.vi_state.input_mode == InputMode.INSERT
-            replace_mode = manager.vi_state.input_mode == InputMode.REPLACE
+            insert_mode = manager.get_vi_state(cli).input_mode == InputMode.INSERT
+            replace_mode = manager.get_vi_state(cli).input_mode == InputMode.REPLACE
             sel = cli.buffers[editor_buffer.buffer_name].selection_state
             visual_line = sel is not None and sel.type == SelectionType.LINES
             visual_char = sel is not None and sel.type == SelectionType.CHARACTERS

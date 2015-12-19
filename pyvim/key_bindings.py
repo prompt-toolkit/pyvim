@@ -35,13 +35,12 @@ def create_key_bindings(editor):
         enable_search=True,
         enable_extra_page_navigation=Always(),
         enable_system_bindings=Always())
-    manager.vi_state.input_mode = InputMode.NAVIGATION
 
     # Filters.
     vi_buffer_focussed = Condition(lambda cli: cli.current_buffer_name.startswith('buffer-'))
 
-    in_insert_mode = (ViStateFilter(manager.vi_state, InputMode.INSERT) & vi_buffer_focussed)
-    in_navigation_mode = (ViStateFilter(manager.vi_state, InputMode.NAVIGATION) &
+    in_insert_mode = (ViStateFilter(manager.get_vi_state, InputMode.INSERT) & vi_buffer_focussed)
+    in_navigation_mode = (ViStateFilter(manager.get_vi_state, InputMode.NAVIGATION) &
                           vi_buffer_focussed)
 
     # Decorator.
@@ -90,7 +89,7 @@ def create_key_bindings(editor):
         """
         editor.enter_command_mode()
 
-    @handle(Keys.Tab, filter=ViStateFilter(manager.vi_state, InputMode.INSERT) &
+    @handle(Keys.Tab, filter=ViStateFilter(manager.get_vi_state, InputMode.INSERT) &
             ~HasFocus(COMMAND_BUFFER) & WhitespaceBeforeCursorOnLine())
     def autocomplete_or_indent(event):
         """
