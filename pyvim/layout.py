@@ -9,9 +9,10 @@ from prompt_toolkit.layout.containers import Window, ConditionalContainer, Scrol
 from prompt_toolkit.layout.controls import BufferControl, FillControl
 from prompt_toolkit.layout.controls import TokenListControl
 from prompt_toolkit.layout.dimension import LayoutDimension
+from prompt_toolkit.layout.highlighters import SelectionHighlighter, SearchHighlighter, ConditionalHighlighter, MatchingBracketHighlighter
 from prompt_toolkit.layout.margins import ConditionalMargin, NumberredMargin
 from prompt_toolkit.layout.menus import CompletionsMenu
-from prompt_toolkit.layout.processors import Processor, HighlightSearchProcessor, HighlightSelectionProcessor, HighlightMatchingBracketProcessor, ConditionalProcessor, BeforeInput, ShowTrailingWhiteSpaceProcessor, Transformation
+from prompt_toolkit.layout.processors import Processor, ConditionalProcessor, BeforeInput, ShowTrailingWhiteSpaceProcessor, Transformation
 from prompt_toolkit.layout.screen import Char
 from prompt_toolkit.layout.toolbars import TokenListToolbar, SystemToolbar, SearchToolbar, ValidationToolbar, CompletionsToolbar
 from prompt_toolkit.mouse_events import MouseEventTypes
@@ -507,11 +508,6 @@ class EditorLayout(object):
             return self.editor.wrap_lines
 
         input_processors = [
-            # Highlighting of the search.
-            ConditionalProcessor(
-                HighlightSearchProcessor(preview_search=preview_search),
-                Condition(lambda cli: self.editor.highlight_search)),
-
             # Processor for visualising spaces. (should come before the
             # selection processor, otherwise, we won't see these spaces
             # selected.)
@@ -519,20 +515,28 @@ class EditorLayout(object):
                 ShowTrailingWhiteSpaceProcessor(),
                 Condition(lambda cli: self.editor.display_unprintable_characters)),
 
-            # Highlight selection.
-            HighlightSelectionProcessor(),
-
-            # Highlight matching parentheses.
-            HighlightMatchingBracketProcessor(),
-
             # Reporting of errors, for Pyflakes.
             ReportingProcessor(editor_buffer),
 
             # Replace tabs by spaces.
             TabsProcessor(self.editor)]
 
+        highlighters = [
+            # Highlighting of the selection.
+            SelectionHighlighter(),
+
+            # Highlighting of the search.
+            ConditionalHighlighter(
+                SearchHighlighter(preview_search=preview_search),
+                Condition(lambda cli: self.editor.highlight_search)),
+
+            # Highlight matching parentheses.
+            MatchingBracketHighlighter(),
+        ]
+
         return BufferControl(lexer=DocumentLexer(editor_buffer),
                              input_processors=input_processors,
+                             highlighters=highlighters,
                              buffer_name=buffer_name,
                              preview_search=preview_search,
                              wrap_lines=wrap_lines,
