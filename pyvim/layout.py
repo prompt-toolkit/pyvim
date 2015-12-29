@@ -280,6 +280,7 @@ class WindowStatusBar(TokenListToolbar):
             replace_mode = manager.get_vi_state(cli).input_mode == InputMode.REPLACE
             sel = cli.buffers[editor_buffer.buffer_name].selection_state
             visual_line = sel is not None and sel.type == SelectionType.LINES
+            visual_block = sel is not None and sel.type == SelectionType.BLOCK
             visual_char = sel is not None and sel.type == SelectionType.CHARACTERS
 
             def mode():
@@ -291,6 +292,8 @@ class WindowStatusBar(TokenListToolbar):
                             return ' -- INSERT --'
                     elif replace_mode:
                         return ' -- REPLACE --'
+                    elif visual_block:
+                        return ' -- VISUAL BLOCK --'
                     elif visual_line:
                         return ' -- VISUAL LINE --'
                     elif visual_char:
