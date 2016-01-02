@@ -27,7 +27,7 @@ def run_rc_file(editor, rc_file):
     Run rc file.
     """
     assert isinstance(editor, Editor)
-    assert isinstance(rc_file, six.text_type)
+    assert isinstance(rc_file, six.string_types)
 
     # Expand tildes.
     rc_file = os.path.expanduser(rc_file)
