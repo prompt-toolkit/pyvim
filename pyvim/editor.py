@@ -199,7 +199,7 @@ class Editor(object):
         Return the `EditorBuffer` that is currently active.
         """
         # For each buffer name on the focus stack.
-        for current_buffer_name in [self.cli.current_buffer_name, self.cli.focus_stack.previous]:
+        for current_buffer_name in self.cli.buffers.focus_stack:
             if current_buffer_name is not None:
                 # Find/return the EditorBuffer with this name.
                 for b in self.window_arrangement.editor_buffers:
@@ -241,8 +241,8 @@ class Editor(object):
 
         # Make sure that the focus stack of prompt-toolkit has the current
         # page.
-        self.cli.focus_stack._stack = [
-            self.window_arrangement.active_editor_buffer.buffer_name]
+        self.cli.focus(
+            self.window_arrangement.active_editor_buffer.buffer_name)
 
     def _current_buffer_changed(self, cli):
         """
@@ -316,7 +316,7 @@ class Editor(object):
         """
         Go into command mode.
         """
-        self.cli.focus_stack.push(COMMAND_BUFFER)
+        self.cli.push_focus(COMMAND_BUFFER)
         self.key_bindings_manager.get_vi_state(self.cli).input_mode = InputMode.INSERT
 
         self.previewer.save()
@@ -327,7 +327,7 @@ class Editor(object):
         """
         self.previewer.restore()
 
-        self.cli.focus_stack.pop()
+        self.cli.pop_focus()
         self.key_bindings_manager.get_vi_state(self.cli).input_mode = InputMode.NAVIGATION
 
         self.cli.buffers[COMMAND_BUFFER].reset(append_to_history=append_to_history)
