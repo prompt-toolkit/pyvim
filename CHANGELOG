@@ -1,6 +1,21 @@
 CHANGELOG
 =========
 
+0.0.12: 2016-01-03
+-----------------
+
+Upgrade to prompt_toolkit==0.56 and ptpython==0.27.
+
+New features:
+- Visual block selection type.
+- Handle mouse events on tabs.
+- Focus window on click.
+- Show the current document in the titlebar.
+
+Fixes:
+- Make sure that 'pyvim -u ...'  alsa works on Python 2.
+
+
 0.0.11: 2015-10-29
 -----------------
 
