@@ -17,7 +17,7 @@ setup(
     version=pyvim.__version__,
     license='LICENSE',
     url='https://github.com/jonathanslenders/pyvim',
-    description='Pure Pyton Vi Implementation',
+    description='Pure Python Vi Implementation',
     long_description=long_description,
     packages=find_packages('.'),
     install_requires = [
