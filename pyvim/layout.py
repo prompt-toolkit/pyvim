@@ -563,7 +563,7 @@ class ReportingProcessor(Processor):
         return Transformation(document, tokens)
 
     def invalidation_hash(self, cli, document):
-        return (self.editor_buffer.report_errors, )
+        return tuple(self.editor_buffer.report_errors)
 
 
 
