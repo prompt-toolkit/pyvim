@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from prompt_toolkit.layout.lexers import Lexer
-from pygments.lexers import get_lexer_for_filename
+from pygments.lexers import get_lexer_for_mimetype
 from pygments.token import Token
 from pygments.util import ClassNotFound
 
@@ -26,7 +26,9 @@ class DocumentLexer(Lexer):
         if location:
             # Create an instance of the correct lexer class.
             try:
-                lexer = get_lexer_for_filename(location, stripnl=False, stripall=False, ensurenl=False)
+                import magic
+                mimetype = magic.from_file(location, mime=True)
+                lexer = get_lexer_for_mimetype(mimetype)
             except ClassNotFound:
                 pass
             else:
