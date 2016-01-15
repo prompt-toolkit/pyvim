@@ -53,7 +53,7 @@ def configure(editor):
         editor_buffer = editor.current_editor_buffer
 
         if editor_buffer is not None:
-            if editor_buffer.filename is None:
+            if editor_buffer.get_display_name() is None:
                 editor.show_message("File doesn't have a filename. Please save first.")
                 return
             else:
@@ -63,7 +63,7 @@ def configure(editor):
         # `CommandLineInterface.run_in_terminal` to go to the background and
         # not destroy the window layout.
         def execute():
-            call(['python', editor_buffer.filename])
+            call(['python', editor_buffer.get_display_name()])
             six.moves.input('Press enter to continue...')
 
         editor.cli.run_in_terminal(execute)
