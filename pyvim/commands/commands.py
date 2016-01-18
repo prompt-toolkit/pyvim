@@ -220,7 +220,7 @@ def buffer_list(editor):
             eb = info.editor_buffer
             print(' %3i %-2s %-20s  line %i' % (
                   info.index, char, eb.location, (eb.buffer.document.cursor_position_row + 1)))
-        (input() if six.PY3 else raw_input)('\nPress ENTER to continue...')
+        six.moves.input('\nPress ENTER to continue...')
     editor.cli.run_in_terminal(handler)
 
 
