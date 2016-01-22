@@ -18,7 +18,7 @@ from prompt_toolkit.interface import CommandLineInterface
 from prompt_toolkit.key_binding.vi_state import InputMode
 from prompt_toolkit.shortcuts import create_eventloop
 from prompt_toolkit.utils import Callback
-from prompt_toolkit.styles import DynamicStyle, PygmentsStyle
+from prompt_toolkit.styles import DynamicStyle
 
 from .commands.completer import create_command_completer
 from .commands.handler import handle_command
@@ -266,6 +266,7 @@ class Editor(object):
         if name not in self._reporters_running_for_buffer_names:
             text = eb.buffer.text
             self._reporters_running_for_buffer_names.add(name)
+            eb.report_errors = []
 
             # Don't run reporter when we don't have a location. (We need to
             # know the filetype, actually.)
@@ -286,7 +287,7 @@ class Editor(object):
                     # reporter errors. (We were running in another thread.)
                     if text == eb.buffer.text:
                         eb.report_errors = report_errors
-                        self.cli._redraw()
+                        self.cli.invalidate()
                     else:
                         # Restart reporter when the text was changed.
                         self._current_buffer_changed(self.cli)
