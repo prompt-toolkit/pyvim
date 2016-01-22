@@ -176,7 +176,7 @@ class Editor(object):
                 COMMAND_BUFFER: command_buffer,
                 SEARCH_BUFFER: search_buffer,
             },
-            style=DynamicStyle(lambda: PygmentsStyle(self.current_style)),
+            style=DynamicStyle(lambda: self.current_style),
             paste_mode=Condition(lambda cli: self.paste_mode),
             ignore_case=Condition(lambda cli: self.ignore_case),
             mouse_support=Condition(lambda cli: self.enable_mouse_support),

@@ -2,7 +2,7 @@
 The styles, for the colorschemes.
 """
 from __future__ import unicode_literals
-from prompt_toolkit.styles import default_style_extensions
+from prompt_toolkit.styles import default_style_extensions, style_from_dict
 
 from pygments.styles import get_all_styles, get_style_by_name
 from pygments.token import Token
@@ -21,13 +21,12 @@ def get_editor_style_by_name(name):
     """
     style_cls = get_style_by_name(name)
 
-    class EditorStyle(style_cls):
-        styles = {}
-        styles.update(style_cls.styles)
-        styles.update(default_style_extensions)
-        styles.update(style_extensions)
-    EditorStyle.__name__ = str('PyvimStyle_%s' % style_cls.__name__)
-    return EditorStyle
+    styles = {}
+    styles.update(style_cls.styles)
+    styles.update(default_style_extensions)
+    styles.update(style_extensions)
+
+    return style_from_dict(styles)
 
 
 def generate_built_in_styles():
