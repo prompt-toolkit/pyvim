@@ -25,10 +25,10 @@ class ReporterError(object):
     """
     Error found by a reporter.
     """
-    def __init__(self, lineno, start_index, end_index, message_token_list):
+    def __init__(self, lineno, start_column, end_column, message_token_list):
         self.lineno = lineno  # Zero based line number.
-        self.start_index = start_index
-        self.end_index = end_index
+        self.start_column = start_column
+        self.end_column = end_column
         self.message_token_list = message_token_list
 
 
@@ -73,8 +73,8 @@ def report_pyflakes(document):
             end_index += 1
 
         return ReporterError(lineno=message.lineno - 1,
-                             start_index=start_index,
-                             end_index=end_index,
+                             start_column=message.col,
+                             end_column=message.col + end_index - start_index,
                              message_token_list=format_flake_message(message))
 
     # Construct list of ReporterError instances.
