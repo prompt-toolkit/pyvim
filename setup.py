@@ -22,7 +22,7 @@ setup(
     packages=find_packages('.'),
     install_requires = [
         'prompt_toolkit==0.58',
-        'ptpython==0.28',  # For the Python completion (with Jedi.)
+        'ptpython==0.29',  # For the Python completion (with Jedi.)
         'pyflakes',        # For Python error reporting.
         'pygments',        # For the syntax highlighting.
         'docopt',          # For command line arguments.
