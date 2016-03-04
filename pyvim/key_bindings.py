@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from prompt_toolkit.filters import Condition, HasFocus, Filter, Always
+from prompt_toolkit.filters import Condition, HasFocus, Filter
 from prompt_toolkit.key_binding.bindings.utils import create_handle_decorator
 from prompt_toolkit.key_binding.bindings.vi import ViStateFilter
 from prompt_toolkit.key_binding.manager import KeyBindingManager
@@ -31,10 +31,10 @@ def create_key_bindings(editor):
     """
     # Create new Key binding manager.
     manager = KeyBindingManager(
-        enable_vi_mode=Always(),
+        enable_vi_mode=True,
         enable_search=True,
-        enable_extra_page_navigation=Always(),
-        enable_system_bindings=Always())
+        enable_extra_page_navigation=True,
+        enable_system_bindings=True)
 
     # Filters.
     vi_buffer_focussed = Condition(lambda cli: cli.current_buffer_name.startswith('buffer-'))
