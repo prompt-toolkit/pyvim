@@ -1,5 +1,6 @@
 from __future__ import unicode_literals, print_function
 import os
+import stat
 import six
 import sys
 
@@ -318,7 +319,20 @@ def write(editor, location, force=False):
         if location is None and eb.location is None:
             editor.show_message(_NO_FILE_NAME)
         else:
-            eb.write(location)
+            if force:
+                if location is None:
+                    this_location = eb.location
+                else:
+                    this_location = location
+                toggle_write_permission = False
+                if stat.S_IMODE(os.stat(this_location).st_mode & stat.S_IWRITE) == 0:       # check if the file is not writable
+                    os.chmod(this_location, os.stat(this_location).st_mode | stat.S_IWRITE) # make the file writable
+                    toggle_write_permission = True
+                eb.write(location)
+                if toggle_write_permission:                                                 # if the file was not writable
+                    os.chmod(this_location, os.stat(this_location).st_mode & ~stat.S_IWRITE) # make the file not writable
+            else:
+                eb.write(location)
 
 
 @location_cmd('wq', accepts_force=True)
