@@ -28,7 +28,7 @@ class FileIO(EditorIO):
         return '://' not in location and not os.path.isdir(location)
 
     def exists(self, location):
-        return os.path.exists(location)
+        return os.path.exists(os.path.expanduser(location))
 
     def read(self, location):
         """
