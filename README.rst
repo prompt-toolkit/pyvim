@@ -186,11 +186,6 @@ Q
 A
  No, it uses only ``prompt-toolkit``.
 
-Q
- Why Python?
-A
- The only alternative would be Haskell, but I still have to learn that.
-
 
 Thanks
 ------
