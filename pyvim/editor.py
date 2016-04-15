@@ -100,7 +100,7 @@ class Editor(object):
             application=self.application)
 
         # Start in navigation mode.
-        self.key_bindings_manager.get_vi_state(self.cli).input_mode = InputMode.NAVIGATION
+        self.cli.vi_state.input_mode = InputMode.NAVIGATION
 
         # Hide message when a key is pressed.
         def key_pressed():
@@ -318,7 +318,7 @@ class Editor(object):
         Go into command mode.
         """
         self.cli.push_focus(COMMAND_BUFFER)
-        self.key_bindings_manager.get_vi_state(self.cli).input_mode = InputMode.INSERT
+        self.cli.vi_state.input_mode = InputMode.INSERT
 
         self.previewer.save()
 
@@ -329,6 +329,6 @@ class Editor(object):
         self.previewer.restore()
 
         self.cli.pop_focus()
-        self.key_bindings_manager.get_vi_state(self.cli).input_mode = InputMode.NAVIGATION
+        self.cli.vi_state.input_mode = InputMode.NAVIGATION
 
         self.cli.buffers[COMMAND_BUFFER].reset(append_to_history=append_to_history)
