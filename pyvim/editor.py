@@ -99,9 +99,6 @@ class Editor(object):
             eventloop=self.eventloop,
             application=self.application)
 
-        # Start in navigation mode.
-        self.cli.vi_state.input_mode = InputMode.NAVIGATION
-
         # Hide message when a key is pressed.
         def key_pressed():
             self.message = None
@@ -310,8 +307,12 @@ class Editor(object):
         # Make sure everything is in sync, before starting.
         self.sync_with_prompt_toolkit()
 
+        def pre_run():
+            # Start in navigation mode.
+            self.cli.vi_state.input_mode = InputMode.NAVIGATION
+
         # Run eventloop of prompt_toolkit.
-        self.cli.run(reset_current_buffer=False)
+        self.cli.run(reset_current_buffer=False, pre_run=pre_run)
 
     def enter_command_mode(self):
         """
