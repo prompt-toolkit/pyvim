@@ -11,7 +11,7 @@ from __future__ import unicode_literals
 
 from prompt_toolkit.application import Application
 from prompt_toolkit.buffer import Buffer, AcceptAction
-from prompt_toolkit.enums import SEARCH_BUFFER
+from prompt_toolkit.enums import SEARCH_BUFFER, EditingMode
 from prompt_toolkit.filters import Always, Condition
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.interface import CommandLineInterface
@@ -166,6 +166,7 @@ class Editor(object):
 
         # Create CLI.
         application = Application(
+            editing_mode=EditingMode.VI,
             layout=self.editor_layout.layout,
             key_bindings_registry=self.key_bindings_manager.registry,
             get_title=lambda: get_terminal_title(self),
