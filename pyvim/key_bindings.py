@@ -1,9 +1,8 @@
 from __future__ import unicode_literals
 
-from prompt_toolkit.filters import Condition, HasFocus, Filter, InViMode
+from prompt_toolkit.filters import Condition, HasFocus, Filter, ViInsertMode, ViNavigationMode
 from prompt_toolkit.key_binding.bindings.utils import create_handle_decorator
 from prompt_toolkit.key_binding.manager import KeyBindingManager
-from prompt_toolkit.key_binding.vi_state import InputMode
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.layout.utils import find_window_for_buffer_name
 
@@ -38,8 +37,8 @@ def create_key_bindings(editor):
     # Filters.
     vi_buffer_focussed = Condition(lambda cli: cli.current_buffer_name.startswith('buffer-'))
 
-    in_insert_mode = InViMode(InputMode.INSERT) & vi_buffer_focussed
-    in_navigation_mode = InViMode(InputMode.NAVIGATION) & vi_buffer_focussed
+    in_insert_mode = ViInsertMode() & vi_buffer_focussed
+    in_navigation_mode = ViNavigationMode() & vi_buffer_focussed
 
     # Decorator.
     handle = create_handle_decorator(manager.registry)
@@ -87,7 +86,7 @@ def create_key_bindings(editor):
         """
         editor.enter_command_mode()
 
-    @handle(Keys.Tab, filter=InViMode(InputMode.INSERT) &
+    @handle(Keys.Tab, filter=ViInsertMode() &
             ~HasFocus(COMMAND_BUFFER) & WhitespaceBeforeCursorOnLine())
     def autocomplete_or_indent(event):
         """
