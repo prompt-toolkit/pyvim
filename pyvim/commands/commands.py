@@ -600,5 +600,16 @@ def enable_mouse(editor):
 
 @set_cmd('nomouse')
 def disable_mouse(editor):
-    " disable mouse. "
+    " Disable mouse. "
     editor.enable_mouse_support = False
+
+@set_cmd('tildeop')
+def enable_tildeop(editor):
+    " Enable tilde operator. "
+    editor.cli.vi_state.tilde_operator = True
+
+@set_cmd('notildeop')
+def disable_tildeop(editor):
+    " Disable tilde operator. "
+    editor.cli.vi_state.tilde_operator = False
+
