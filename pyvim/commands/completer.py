@@ -20,7 +20,7 @@ def create_command_completer(editor):
     return GrammarCompleter(COMMAND_GRAMMAR, {
         'command': WordCompleter(commands),
         'location': PathCompleter(expanduser=True),
-        'set_option': WordCompleter(SET_COMMANDS),
+        'set_option': WordCompleter(sorted(SET_COMMANDS)),
         'buffer_name': BufferNameCompleter(editor),
         'colorscheme': ColorSchemeCompleter(editor),
         'shell_command': SystemCompleter(),
