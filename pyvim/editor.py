@@ -17,7 +17,6 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.interface import CommandLineInterface
 from prompt_toolkit.key_binding.vi_state import InputMode
 from prompt_toolkit.shortcuts import create_eventloop
-from prompt_toolkit.utils import Callback
 from prompt_toolkit.styles import DynamicStyle
 
 from .commands.completer import create_command_completer
@@ -100,7 +99,7 @@ class Editor(object):
             application=self.application)
 
         # Hide message when a key is pressed.
-        def key_pressed():
+        def key_pressed(_):
             self.message = None
         self.cli.input_processor.beforeKeyPress += key_pressed
 
@@ -179,12 +178,12 @@ class Editor(object):
             ignore_case=Condition(lambda cli: self.ignore_case),
             mouse_support=Condition(lambda cli: self.enable_mouse_support),
             use_alternate_screen=True,
-            on_buffer_changed=Callback(self._current_buffer_changed))
+            on_buffer_changed=self._current_buffer_changed)
 
         # Handle command line previews.
         # (e.g. when typing ':colorscheme blue', it should already show the
         # preview before pressing enter.)
-        def preview():
+        def preview(_):
             if self.cli.current_buffer == command_buffer:
                 self.previewer.preview(command_buffer.text)
         command_buffer.on_text_changed += preview
