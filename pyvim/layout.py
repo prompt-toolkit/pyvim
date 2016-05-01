@@ -483,19 +483,21 @@ class EditorLayout(object):
         def wrap_lines(cli):
             return self.editor.wrap_lines
 
-        window = Window(self._create_buffer_control(editor_buffer),
-                        allow_scroll_beyond_bottom=Always(),
-                        scroll_offsets=ScrollOffsets(
-                            left=0, right=0,
-                            top=Integer.from_callable(lambda: self.editor.scroll_offset),
-                            bottom=Integer.from_callable(lambda: self.editor.scroll_offset)),
-                        wrap_lines=wrap_lines,
-                        left_margins=[ConditionalMargin(
-                                margin=NumberredMargin(
-                                    display_tildes=True,
-                                    relative=Condition(lambda cli: self.editor.relative_number)),
-                                filter=Condition(lambda cli: self.editor.show_line_numbers))])
-
+        window = Window(
+            self._create_buffer_control(editor_buffer),
+            allow_scroll_beyond_bottom=Always(),
+            scroll_offsets=ScrollOffsets(
+                left=0, right=0,
+                top=Integer.from_callable(lambda: self.editor.scroll_offset),
+                bottom=Integer.from_callable(lambda: self.editor.scroll_offset)),
+            wrap_lines=wrap_lines,
+            left_margins=[ConditionalMargin(
+                    margin=NumberredMargin(
+                        display_tildes=True,
+                        relative=Condition(lambda cli: self.editor.relative_number)),
+                    filter=Condition(lambda cli: self.editor.show_line_numbers))],
+            cursorline=Condition(lambda cli: self.editor.cursorline),
+            cursorcolumn=Condition(lambda cli: self.editor.cursorcolumn))
 
         return HSplit([
             window,

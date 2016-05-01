@@ -603,13 +603,35 @@ def disable_mouse(editor):
     " Disable mouse. "
     editor.enable_mouse_support = False
 
+
 @set_cmd('tildeop')
 def enable_tildeop(editor):
     " Enable tilde operator. "
     editor.cli.vi_state.tilde_operator = True
+
 
 @set_cmd('notildeop')
 def disable_tildeop(editor):
     " Disable tilde operator. "
     editor.cli.vi_state.tilde_operator = False
 
+
+@set_cmd('cursorline')
+def enable_cursorline(editor):
+    " Highlight the line that contains the cursor. "
+    editor.cursorline = True
+
+@set_cmd('nocursorline')
+def disable_cursorline(editor):
+    " No cursorline. "
+    editor.cursorline = False
+
+@set_cmd('cursorcolumn')
+def enable_cursorcolumn(editor):
+    " Highlight the column that contains the cursor. "
+    editor.cursorcolumn = True
+
+@set_cmd('nocursorcolumn')
+def disable_cursorcolumn(editor):
+    " No cursorcolumn. "
+    editor.cursorcolumn = False

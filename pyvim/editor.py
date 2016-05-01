@@ -61,6 +61,8 @@ class Editor(object):
         self.scroll_offset = 0  # ':set scrolloff'
         self.relative_number = False  # ':set relativenumber'
         self.wrap_lines = True  # ':set wrap'
+        self.cursorline = False  # ':set cursorline'
+        self.cursorcolumn = False  # ':set cursorcolumn'
 
         # Ensure config directory exists.
         self.config_directory = os.path.abspath(os.path.expanduser(config_directory))
