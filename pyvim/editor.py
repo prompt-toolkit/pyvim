@@ -63,6 +63,7 @@ class Editor(object):
         self.wrap_lines = True  # ':set wrap'
         self.cursorline = False  # ':set cursorline'
         self.cursorcolumn = False  # ':set cursorcolumn'
+        self.colorcolumn = []  # ':set colorcolumn'. List of integers.
 
         # Ensure config directory exists.
         self.config_directory = os.path.abspath(os.path.expanduser(config_directory))

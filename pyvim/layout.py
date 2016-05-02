@@ -497,7 +497,8 @@ class EditorLayout(object):
                         relative=Condition(lambda cli: self.editor.relative_number)),
                     filter=Condition(lambda cli: self.editor.show_line_numbers))],
             cursorline=Condition(lambda cli: self.editor.cursorline),
-            cursorcolumn=Condition(lambda cli: self.editor.cursorcolumn))
+            cursorcolumn=Condition(lambda cli: self.editor.cursorcolumn),
+            get_colorcolumn=(lambda cli: self.editor.colorcolumn))
 
         return HSplit([
             window,

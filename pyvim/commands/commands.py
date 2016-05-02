@@ -420,12 +420,14 @@ def line_numbers_hide(editor):
 
 
 @set_cmd('hlsearch')
+@set_cmd('hls')
 def search_highlight(editor):
     """ Highlight search matches. """
     editor.highlight_search = True
 
 
 @set_cmd('nohlsearch')
+@set_cmd('nohls')
 def search_no_highlight(editor):
     """ Don't highlight search matches. """
     editor.highlight_search = False
@@ -444,12 +446,14 @@ def paste_mode_leave(editor):
 
 
 @set_cmd('ruler')
+@set_cmd('ru')
 def ruler_show(editor):
     """ Show ruler. """
     editor.show_ruler = True
 
 
 @set_cmd('noruler')
+@set_cmd('noru')
 def ruler_hide(editor):
     """ Hide ruler. """
     editor.show_ruler = False
@@ -570,12 +574,14 @@ def jedi_disable(editor):
 
 
 @set_cmd('relativenumber')
+@set_cmd('rnu')
 def relative_number(editor):
     " Enable relative number "
     editor.relative_number = True
 
 
 @set_cmd('norelativenumber')
+@set_cmd('nornu')
 def no_relative_number(editor):
     " Disable relative number "
     editor.relative_number = False
@@ -639,3 +645,15 @@ def enable_cursorcolumn(editor):
 def disable_cursorcolumn(editor):
     " No cursorcolumn. "
     editor.cursorcolumn = False
+
+
+@set_cmd('colorcolumn', accepts_value=True)
+@set_cmd('cc', accepts_value=True)
+def set_scroll_offset(editor, value):
+    try:
+        value = [int(val) for val in value.split(',')]
+    except ValueError:
+        editor.show_message(
+            'Invalid value. Expecting comma separated list of integers')
+    else:
+        editor.colorcolumn = value
