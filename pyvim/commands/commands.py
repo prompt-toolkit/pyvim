@@ -617,21 +617,25 @@ def disable_tildeop(editor):
 
 
 @set_cmd('cursorline')
+@set_cmd('cul')
 def enable_cursorline(editor):
     " Highlight the line that contains the cursor. "
     editor.cursorline = True
 
 @set_cmd('nocursorline')
+@set_cmd('nocul')
 def disable_cursorline(editor):
     " No cursorline. "
     editor.cursorline = False
 
 @set_cmd('cursorcolumn')
+@set_cmd('cuc')
 def enable_cursorcolumn(editor):
     " Highlight the column that contains the cursor. "
     editor.cursorcolumn = True
 
 @set_cmd('nocursorcolumn')
+@set_cmd('nocuc')
 def disable_cursorcolumn(editor):
     " No cursorcolumn. "
     editor.cursorcolumn = False
