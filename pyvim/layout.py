@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from prompt_toolkit.filters import HasFocus, HasSearch, Condition, HasArg, Always
 from prompt_toolkit.key_binding.vi_state import InputMode
 from prompt_toolkit.layout import HSplit, VSplit, FloatContainer, Float
-from prompt_toolkit.layout.containers import Window, ConditionalContainer, ScrollOffsets
+from prompt_toolkit.layout.containers import Window, ConditionalContainer, ScrollOffsets, ColorColumn
 from prompt_toolkit.layout.controls import BufferControl, FillControl
 from prompt_toolkit.layout.controls import TokenListControl
 from prompt_toolkit.layout.dimension import LayoutDimension
@@ -498,7 +498,8 @@ class EditorLayout(object):
                     filter=Condition(lambda cli: self.editor.show_line_numbers))],
             cursorline=Condition(lambda cli: self.editor.cursorline),
             cursorcolumn=Condition(lambda cli: self.editor.cursorcolumn),
-            get_colorcolumn=(lambda cli: self.editor.colorcolumn))
+            get_colorcolumns=(
+                lambda cli: [ColorColumn(pos) for pos in self.editor.colorcolumn]))
 
         return HSplit([
             window,
