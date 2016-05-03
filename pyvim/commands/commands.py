@@ -363,6 +363,8 @@ def help(editor):
     editor.show_help()
 
 
+@location_cmd('tabe')
+@location_cmd('tabedit')
 @location_cmd('tabnew')
 def tab_new(editor, location):
     """
@@ -372,6 +374,7 @@ def tab_new(editor, location):
 
 
 @cmd('tabclose')
+@cmd('tabc')
 def tab_close(editor):
     """
     Close tab page.
@@ -380,6 +383,7 @@ def tab_close(editor):
 
 
 @cmd('tabnext')
+@cmd('tabn')
 def tab_next(editor):
     """
     Go to next tab.
@@ -388,6 +392,7 @@ def tab_next(editor):
 
 
 @cmd('tabprevious')
+@cmd('tabp')
 def tab_previous(editor):
     """
     Go to previous tab.
@@ -396,6 +401,7 @@ def tab_previous(editor):
 
 
 @_cmd('colorscheme')
+@_cmd('colo')
 def color_scheme(editor, variables):
     """
     Go to one of the open buffers.
@@ -526,24 +532,28 @@ def set_scroll_offset(editor, value):
 
 
 @set_cmd('incsearch')
+@set_cmd('is')
 def incsearch_enable(editor):
     """ Enable incsearch. """
     editor.incsearch = True
 
 
 @set_cmd('noincsearch')
+@set_cmd('nois')
 def incsearch_disable(editor):
     """ Disable incsearch. """
     editor.incsearch = False
 
 
 @set_cmd('ignorecase')
+@set_cmd('ic')
 def search_ignorecase(editor):
     """ Enable case insensitive searching. """
     editor.ignore_case = True
 
 
 @set_cmd('noignorecase')
+@set_cmd('noic')
 def searc_no_ignorecase(editor):
     """ Disable case insensitive searching. """
     editor.ignore_case = False
@@ -611,12 +621,14 @@ def disable_mouse(editor):
 
 
 @set_cmd('tildeop')
+@set_cmd('top')
 def enable_tildeop(editor):
     " Enable tilde operator. "
     editor.cli.vi_state.tilde_operator = True
 
 
 @set_cmd('notildeop')
+@set_cmd('notop')
 def disable_tildeop(editor):
     " Disable tilde operator. "
     editor.cli.vi_state.tilde_operator = False
