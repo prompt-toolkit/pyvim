@@ -1,6 +1,17 @@
 CHANGELOG
 =========
 
+0.0.17: 2016-05-05
+-----------------
+
+Upgrade to prompt_toolkit==1.0.0 and ptpython==0.32.
+
+- Added colorcolumn, cursorcolumn and cursorline commands.
+- Added cul,nocul,cuc,nocuc commands.
+- Added tildeop command.
+- Fixes bug in ~ expension in :e command.
+
+
 0.0.16: 2016-03-14
 -----------------
 
