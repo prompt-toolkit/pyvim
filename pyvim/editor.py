@@ -24,6 +24,7 @@ from .commands.handler import handle_command
 from .commands.preview import CommandPreviewer
 from .editor_buffer import EditorBuffer
 from .enums import COMMAND_BUFFER
+from .file_filter import file_filter
 from .help import HELP_TEXT
 from .key_bindings import create_key_bindings
 from .layout import EditorLayout, get_terminal_title
@@ -156,7 +157,7 @@ class Editor(object):
         commands_history = FileHistory(os.path.join(self.config_directory, 'commands_history'))
         command_buffer = Buffer(accept_action=AcceptAction(handler=handle_action),
                                 enable_history_search=Always(),
-                                completer=create_command_completer(self),
+                                completer=create_command_completer(self, file_filter=file_filter),
                                 history=commands_history)
 
         search_buffer_history = FileHistory(os.path.join(self.config_directory, 'search_history'))
