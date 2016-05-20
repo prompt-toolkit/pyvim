@@ -29,11 +29,25 @@ from .welcome_message import WELCOME_MESSAGE_TOKENS, WELCOME_MESSAGE_HEIGHT, WEL
 import pyvim.window_arrangement as window_arrangement
 
 import re
+import sys
 
 __all__ = (
     'EditorLayout',
     'get_terminal_title',
 )
+
+def _try_char(character, backup, encoding=sys.stdout.encoding):
+    """
+    Return `character` if it can be encoded using sys.stdout, else return the
+    backup character.
+    """
+    if character.encode(encoding, 'replace') == b'?':
+        return backup
+    else:
+        return character
+
+
+TABSTOP_DOT = _try_char('\u2508', '.')
 
 
 class TabsControl(TokenListControl):
@@ -441,6 +455,11 @@ class EditorLayout(object):
             ]
         )
 
+    def get_vertical_border_char(self, cli):
+        " Return the character to be used for the vertical border. "
+        return Char(char=_try_char('\u2502', '|', cli.output.encoding()),
+                    token=Token.FrameBorder)
+
     def update(self):
         """
         Update layout to match the layout as described in the
@@ -464,8 +483,10 @@ class EditorLayout(object):
                 children = []
                 for n in node:
                     children.append(create_layout_from_node(n))
-                    children.append(Window(width=LayoutDimension.exact(1),
-                                           content=FillControl('\u2502', token=Token.FrameBorder)))
+                    children.append(
+                        Window(width=LayoutDimension.exact(1),
+                               content=FillControl(
+                                   get_char=self.get_vertical_border_char)))
                 children.pop()
                 return VSplit(children)
 
@@ -524,14 +545,15 @@ class EditorLayout(object):
             # selection processor, otherwise, we won't see these spaces
             # selected.)
             ConditionalProcessor(
-                ShowTrailingWhiteSpaceProcessor(),
+                ShowTrailingWhiteSpaceProcessor(char=_try_char('\xb7', '.')),
                 Condition(lambda cli: self.editor.display_unprintable_characters)),
 
             # Replace tabs by spaces.
             TabsProcessor(
                 tabstop=Integer.from_callable(lambda: self.editor.tabstop),
                 get_char1=(lambda cli: '|' if self.editor.display_unprintable_characters else ' '),
-                get_char2=(lambda cli: '\u2508' if self.editor.display_unprintable_characters else ' '),
+                get_char2=(lambda cli: _try_char('\u2508', '.', cli.output.encoding())
+                                       if self.editor.display_unprintable_characters else ' '),
             ),
 
             # Reporting of errors, for Pyflakes.
