@@ -545,7 +545,7 @@ class EditorLayout(object):
             # selection processor, otherwise, we won't see these spaces
             # selected.)
             ConditionalProcessor(
-                ShowTrailingWhiteSpaceProcessor(char=_try_char('\xb7', '.')),
+                ShowTrailingWhiteSpaceProcessor(),
                 Condition(lambda cli: self.editor.display_unprintable_characters)),
 
             # Replace tabs by spaces.
