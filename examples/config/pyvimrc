@@ -2,6 +2,8 @@
 """
 Pyvim configuration. Save to file to: ~/.pyvimrc
 """
+from prompt_toolkit.filters import ViInsertMode
+from prompt_toolkit.key_binding.input_processor import KeyPress
 from prompt_toolkit.keys import Keys
 from subprocess import call
 import six
@@ -43,6 +45,15 @@ def configure(editor):
 
 
     # Add custom key bindings:
+
+    @editor.add_key_binding('j', 'j', filter=ViInsertMode())
+    def _(event):
+        """
+        Typing 'jj' in Insert mode, should go back to navigation mode.
+
+        (imap jj <esc>)
+        """
+        event.cli.input_processor.feed(KeyPress(Keys.Escape))
 
     @editor.add_key_binding(Keys.F9)
     def save_and_execute_python_file(event):
