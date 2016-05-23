@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from prompt_toolkit.buffer import Buffer
+from pyvim.editor import Editor
 from pyvim.window_arrangement import TabPage, EditorBuffer, Window, HSplit, VSplit
 
 import unittest
@@ -8,8 +9,8 @@ import unittest
 
 class BufferTest(unittest.TestCase):
     def setUp(self):
-        b = Buffer()
-        eb = EditorBuffer('b1', b)
+        e = Editor()
+        eb = EditorBuffer(e, 'b1')
         self.window = Window(eb)
         self.tabpage = TabPage(self.window)
 
@@ -19,8 +20,8 @@ class BufferTest(unittest.TestCase):
 
     def test_vsplit(self):
         # Create new buffer.
-        b = Buffer()
-        eb = EditorBuffer('b1', b)
+        e = Editor()
+        eb = EditorBuffer(e, 'b1')
 
         # Insert in tab, by splitting.
         self.tabpage.vsplit(eb)
