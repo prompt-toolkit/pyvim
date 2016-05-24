@@ -12,6 +12,8 @@ pyvim
 Issues, questions, wishes, comments, feedback, remarks? Please create a GitHub
 issue, I appreciate it.
 
+|Build Status|
+
 
 Installation
 ------------
@@ -217,3 +219,7 @@ Thanks
 - To Jedi, pyflakes and the docopt Python libraries.
 - To the Python wcwidth port of Jeff Quast for support of double width characters.
 - To Guido van Rossum, for creating Python.
+
+
+.. |Build Status| image:: https://api.travis-ci.org/jonathanslenders/pyvim.svg?branch=master
+    :target: https://travis-ci.org/jonathanslenders/pyvim#
