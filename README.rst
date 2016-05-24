@@ -165,7 +165,7 @@ And then run from root pyvim directory:
     tox
 
 You need to have installed all the supported versions of python in order to run
-tox command successfully (2.6, 2.7, 3.1, 3.2, 3.3, 3.4).
+tox command successfully.
 
 
 Why did I create Pyvim?
