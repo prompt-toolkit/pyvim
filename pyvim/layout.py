@@ -374,7 +374,7 @@ class SimpleArgToolbar(ConditionalContainer):
     def __init__(self):
         def get_tokens(cli):
             if cli.input_processor.arg is not None:
-                return [(Token.Arg, ' %i ' % cli.input_processor.arg)]
+                return [(Token.Arg, ' %s ' % cli.input_processor.arg)]
             else:
                 return []
 
