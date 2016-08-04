@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+0.0.19: 2016-08-04
+------------------
+
+- Take output encoding ($LANG) into account in several places.
+
+Upgrade to prompt_toolkit==1.0.4
+
+
 0.0.18: 2016-05-09
 ------------------
 
