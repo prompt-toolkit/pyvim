@@ -325,11 +325,12 @@ def write(editor, location, force=False):
                 else:
                     this_location = location
                 toggle_write_permission = False
-                if stat.S_IMODE(os.stat(this_location).st_mode & stat.S_IWRITE) == 0:       # check if the file is not writable
-                    os.chmod(this_location, os.stat(this_location).st_mode | stat.S_IWRITE) # make the file writable
-                    toggle_write_permission = True
+                if os.path.isfile(this_location):
+                    if stat.S_IMODE(os.stat(this_location).st_mode & stat.S_IWRITE) == 0:       # check if the file is not writable
+                        os.chmod(this_location, os.stat(this_location).st_mode | stat.S_IWRITE) # make the file writable
+                        toggle_write_permission = True
                 eb.write(location)
-                if toggle_write_permission:                                                 # if the file was not writable
+                if toggle_write_permission:                                                  # if the file was not writable
                     os.chmod(this_location, os.stat(this_location).st_mode & ~stat.S_IWRITE) # make the file not writable
             else:
                 eb.write(location)
