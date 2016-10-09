@@ -11,7 +11,7 @@ from prompt_toolkit.layout.controls import TokenListControl
 from prompt_toolkit.layout.dimension import LayoutDimension
 from prompt_toolkit.layout.margins import ConditionalMargin, NumberredMargin
 from prompt_toolkit.layout.menus import CompletionsMenu
-from prompt_toolkit.layout.processors import Processor, ConditionalProcessor, BeforeInput, ShowTrailingWhiteSpaceProcessor, Transformation, HighlightSelectionProcessor, HighlightSearchProcessor, HighlightMatchingBracketProcessor, TabsProcessor
+from prompt_toolkit.layout.processors import Processor, ConditionalProcessor, BeforeInput, ShowTrailingWhiteSpaceProcessor, Transformation, HighlightSelectionProcessor, HighlightSearchProcessor, HighlightMatchingBracketProcessor, TabsProcessor, DisplayMultipleCursors
 from prompt_toolkit.layout.screen import Char
 from prompt_toolkit.layout.toolbars import TokenListToolbar, SystemToolbar, SearchToolbar, ValidationToolbar, CompletionsToolbar
 from prompt_toolkit.layout.utils import explode_tokens
@@ -291,7 +291,7 @@ class WindowStatusBar(TokenListToolbar):
     """
     def __init__(self, editor, editor_buffer, manager):
         def get_tokens(cli):
-            insert_mode = cli.vi_state.input_mode == InputMode.INSERT
+            insert_mode = cli.vi_state.input_mode in (InputMode.INSERT, InputMode.INSERT_MULTIPLE)
             replace_mode = cli.vi_state.input_mode == InputMode.REPLACE
             sel = cli.buffers[editor_buffer.buffer_name].selection_state
             visual_line = sel is not None and sel.type == SelectionType.LINES
@@ -563,6 +563,7 @@ class EditorLayout(object):
                 HighlightSearchProcessor(preview_search=preview_search),
                 Condition(lambda cli: self.editor.highlight_search)),
             HighlightMatchingBracketProcessor(),
+            DisplayMultipleCursors(buffer_name),
         ]
 
         return BufferControl(lexer=DocumentLexer(editor_buffer),
