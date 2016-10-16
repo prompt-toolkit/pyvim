@@ -21,7 +21,7 @@ setup(
     long_description=long_description,
     packages=find_packages('.'),
     install_requires = [
-        'prompt_toolkit>=1.0.4,<1.1.0',
+        'prompt_toolkit>=1.0.8,<1.1.0',
         'pyflakes',        # For Python error reporting.
         'pygments',        # For the syntax highlighting.
         'docopt',          # For command line arguments.

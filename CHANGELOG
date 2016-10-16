@@ -1,6 +1,16 @@
 CHANGELOG
 =========
 
+0.0.20: 2016-10-16
+-------------------
+
+- Added support for inserting before/after visual block.
+- Better Jedi integration for completion of Python files.
+- Don't depend on ptpython code anymore.
+
+Upgrade to prompt_toolkit==1.0.8
+
+
 0.0.19: 2016-08-04
 ------------------
 
