@@ -7,6 +7,7 @@ from pyvim.completion import DocumentCompleter
 
 from six import string_types
 
+import stat
 import os
 import weakref
 
@@ -110,7 +111,7 @@ class EditorBuffer(object):
         self.buffer.document = Document(text, cursor_position)
         self._file_content = text
 
-    def write(self, location=None):
+    def write(self, location=None, force=False):
         """
         Write file to I/O backend.
         """
@@ -127,15 +128,40 @@ class EditorBuffer(object):
             self.editor.show_message('Unknown location: %r' % location)
 
         # Write it.
-        try:
-            io.write(self.location, self.buffer.text + '\n', self.encoding)
-            self.is_new = False
-        except Exception as e:
-            # E.g. "No such file or directory."
-            self.editor.show_message('%s' % e)
-        else:
-            # When the save succeeds: update: _file_content.
-            self._file_content = self.buffer.text
+        toggle_write_permission = False
+        done = False
+        while (not done):
+            try:
+                io.write(self.location, self.buffer.text + '\n', self.encoding)
+                self.is_new = False
+                if toggle_write_permission:
+                    try:
+                        os.chmod(self.location, os.stat(self.location).st_mode & ~stat.S_IWRITE)
+                        done = True
+                    except Exception as e:
+                        self.editor.show_message('%s' % e)
+                        done = True
+            except Exception as e:
+                if os.path.isfile(self.location) and (not os.access(self.location, os.W_OK)): # File is not writable
+                    if force:
+                        if not toggle_write_permission:
+                            try:
+                                os.chmod(self.location, os.stat(self.location).st_mode | stat.S_IWRITE)
+                                toggle_write_permission = True
+                            except Exception as e:
+                                self.editor.show_message('%s' % e)
+                                done = True
+                        else:
+                            # E.g. "No such file or directory."
+                            self.editor.show_message('%s' % e)
+                            done = True
+                    else:
+                        self.editor.show_message("'readonly' option is set (add ! to override)")
+                        done = True
+            else:
+                # When the save succeeds: update: _file_content.
+                self._file_content = self.buffer.text
+                done = True
 
     def get_display_name(self, short=False):
         """
