@@ -89,12 +89,11 @@ class Editor(object):
         # Create eventloop.
         self.eventloop = create_eventloop()
 
-        # Create key bindings manager
-        self.key_bindings_manager = create_key_bindings(self)
+        # Create key bindings registry.
+        self.key_bindings_registry = create_key_bindings(self)
 
         # Create layout and CommandLineInterface instance.
-        self.editor_layout = EditorLayout(
-            self, self.key_bindings_manager, self.window_arrangement)
+        self.editor_layout = EditorLayout(self, self.window_arrangement)
         self.application = self._create_application()
 
         self.cli = CommandLineInterface(
@@ -170,7 +169,7 @@ class Editor(object):
         application = Application(
             editing_mode=EditingMode.VI,
             layout=self.editor_layout.layout,
-            key_bindings_registry=self.key_bindings_manager.registry,
+            key_bindings_registry=self.key_bindings_registry,
             get_title=lambda: get_terminal_title(self),
             buffers={
                 COMMAND_BUFFER: command_buffer,
@@ -213,7 +212,7 @@ class Editor(object):
         (Mostly useful for a pyvimrc file, that receives this Editor instance
         as input.)
         """
-        return self.key_bindings_manager.registry.add_binding
+        return self.key_bindings_registry.add_binding
 
     def show_message(self, message):
         """

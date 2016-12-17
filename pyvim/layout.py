@@ -289,7 +289,7 @@ class WindowStatusBar(TokenListToolbar):
     """
     The status bar, which is shown below each window in a tab page.
     """
-    def __init__(self, editor, editor_buffer, manager):
+    def __init__(self, editor, editor_buffer):
         def get_tokens(cli):
             insert_mode = cli.vi_state.input_mode in (InputMode.INSERT, InputMode.INSERT_MULTIPLE)
             replace_mode = cli.vi_state.input_mode == InputMode.REPLACE
@@ -402,9 +402,8 @@ class EditorLayout(object):
     """
     The main layout class.
     """
-    def __init__(self, editor, manager, window_arrangement):
+    def __init__(self, editor, window_arrangement):
         self.editor = editor  # Back reference to editor.
-        self.manager = manager
         self.window_arrangement = window_arrangement
 
         # Mapping from (`window_arrangement.Window`, `EditorBuffer`) to a frame
@@ -525,7 +524,7 @@ class EditorLayout(object):
         return HSplit([
             window,
             VSplit([
-                WindowStatusBar(self.editor, editor_buffer, self.manager),
+                WindowStatusBar(self.editor, editor_buffer),
                 WindowStatusBarRuler(self.editor, window, editor_buffer.buffer_name),
             ]),
         ])

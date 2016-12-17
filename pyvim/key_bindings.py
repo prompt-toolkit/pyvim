@@ -1,8 +1,7 @@
 from __future__ import unicode_literals
 
 from prompt_toolkit.filters import Condition, HasFocus, Filter, ViInsertMode, ViNavigationMode
-from prompt_toolkit.key_binding.bindings.utils import create_handle_decorator
-from prompt_toolkit.key_binding.manager import KeyBindingManager
+from prompt_toolkit.key_binding.defaults import load_key_bindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.layout.utils import find_window_for_buffer_name
 
@@ -28,8 +27,7 @@ def create_key_bindings(editor):
     the ones which are specific for the editor.
     """
     # Create new Key binding manager.
-    manager = KeyBindingManager(
-        enable_vi_mode=True,
+    registry = load_key_bindings(
         enable_search=True,
         enable_extra_page_navigation=True,
         enable_system_bindings=True)
@@ -40,8 +38,7 @@ def create_key_bindings(editor):
     in_insert_mode = ViInsertMode() & vi_buffer_focussed
     in_navigation_mode = ViNavigationMode() & vi_buffer_focussed
 
-    # Decorator.
-    handle = create_handle_decorator(manager.registry)
+    handle = registry.add_binding
 
     @handle(Keys.ControlT)
     def _(event):
@@ -152,7 +149,7 @@ def create_key_bindings(editor):
     def show_help(event):
         editor.show_help()
 
-    return manager
+    return registry
 
 
 class WhitespaceBeforeCursorOnLine(Filter):
