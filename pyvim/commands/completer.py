@@ -14,12 +14,12 @@ __all__ = (
 )
 
 
-def create_command_completer(editor):
+def create_command_completer(editor, file_filter=lambda _: True):
     commands = [c + ' ' for c in get_commands()]
 
     return GrammarCompleter(COMMAND_GRAMMAR, {
         'command': WordCompleter(commands),
-        'location': PathCompleter(expanduser=True),
+        'location': PathCompleter(expanduser=True, file_filter=file_filter),
         'set_option': WordCompleter(sorted(SET_COMMANDS)),
         'buffer_name': BufferNameCompleter(editor),
         'colorscheme': ColorSchemeCompleter(editor),
