@@ -116,6 +116,8 @@ class DirectoryIO(EditorIO):
         result.append('" Directory Listing\n')
         result.append('"    %s\n' % os.path.abspath(directory))
         result.append('" ==================================\n')
+        result.append('../\n')
+        result.append('./\n')
 
         for d in directories:
             result.append('%s/\n' % d)
@@ -127,6 +129,9 @@ class DirectoryIO(EditorIO):
 
     def write(self, location, text, encoding):
         raise NotImplementedError('Cannot write to directory.')
+
+    def isdir(self, location):
+        return True
 
 
 class HttpIO(EditorIO):

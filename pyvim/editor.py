@@ -64,6 +64,8 @@ class Editor(object):
         self.cursorline = False  # ':set cursorline'
         self.cursorcolumn = False  # ':set cursorcolumn'
         self.colorcolumn = []  # ':set colorcolumn'. List of integers.
+        self.file_explorer = ''  # Empty if not in file explorer mode,
+                                 # directory path otherwise.
 
         # Ensure config directory exists.
         self.config_directory = os.path.abspath(os.path.expanduser(config_directory))

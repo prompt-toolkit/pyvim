@@ -431,6 +431,7 @@ class WindowArrangement(object):
                 return eb
             else:
                 # Found! Return it.
+                self.editor.file_explorer = eb.file_explorer
                 return eb
 
     def open_buffer(self, location=None, show_in_current_window=False):
