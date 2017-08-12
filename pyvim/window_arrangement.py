@@ -306,6 +306,7 @@ class WindowArrangement(object):
         """
         Show this EditorBuffer in the current window.
         """
+        self.editor.file_explorer = editor_buffer.file_explorer
         self.active_tab.show_editor_buffer(editor_buffer)
 
         # Clean up buffers.
@@ -426,11 +427,17 @@ class WindowArrangement(object):
             if eb is None:
                 # Create and add EditorBuffer
                 eb = EditorBuffer(self.editor, new_name(), location)
+                if eb.file_explorer:
+                    # Set cursor to beginning of file list
+                    eb.buffer.cursor_position = 0
+                    for _ in range(4):
+                        eb.buffer.cursor_position += eb.buffer.document.get_end_of_line_position() + 1
                 self._add_editor_buffer(eb)
 
                 return eb
             else:
                 # Found! Return it.
+                self.editor.file_explorer = eb.file_explorer
                 return eb
 
     def open_buffer(self, location=None, show_in_current_window=False):

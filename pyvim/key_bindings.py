@@ -7,6 +7,8 @@ from prompt_toolkit.layout.utils import find_window_for_buffer_name
 
 from .enums import COMMAND_BUFFER
 
+import os
+
 __all__ = (
     'create_key_bindings',
 )
@@ -139,11 +141,23 @@ def create_key_bindings(editor):
         editor.sync_with_prompt_toolkit()
 
     @handle(Keys.ControlJ, filter=in_navigation_mode)
-    def goto_line_beginning(event):
-        """ Enter in navigation mode should move to the start of the next line. """
-        b = event.current_buffer
-        b.cursor_down(count=event.arg)
-        b.cursor_position += b.document.get_start_of_line_position(after_whitespace=True)
+    def goto_line_beginning_or_open_file(event):
+        """
+        Enter in navigation mode should move to the start of the next line.
+        Enter in directory mode should open the directory or file under the cursor.
+        """
+        if editor.file_explorer:
+            b = event.current_buffer
+            i0 = b.cursor_position + b.document.get_start_of_line_position()
+            i1 = b.cursor_position + b.document.get_end_of_line_position()
+            name_under_cursor = b.text[i0:i1]
+            editor.file_explorer = os.path.normpath(os.path.join(editor.file_explorer, name_under_cursor))
+            editor.window_arrangement.open_buffer(editor.file_explorer, show_in_current_window=True)
+            editor.sync_with_prompt_toolkit()
+        else:
+            b = event.current_buffer
+            b.cursor_down(count=event.arg)
+            b.cursor_position += b.document.get_start_of_line_position(after_whitespace=True)
 
     @handle(Keys.F1)
     def show_help(event):
