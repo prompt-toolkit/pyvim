@@ -4,6 +4,8 @@ from prompt_toolkit.application import get_app
 from prompt_toolkit.filters import Condition, has_focus, vi_insert_mode, vi_navigation_mode
 from prompt_toolkit.key_binding import KeyBindings
 
+import os
+
 __all__ = (
     'create_key_bindings',
 )
@@ -136,6 +138,24 @@ def create_key_bindings(editor):
     @kb.add('f1')
     def show_help(event):
         editor.show_help()
+
+    @Condition
+    def in_file_explorer_mode():
+        return bool(editor.current_editor_buffer and
+            editor.current_editor_buffer.in_file_explorer_mode)
+
+    @kb.add('enter', filter=in_file_explorer_mode)
+    def open_path(event):
+        """
+        Open file/directory in file explorer mode.
+        """
+        name_under_cursor = event.current_buffer.document.current_line
+        new_path = os.path.normpath(os.path.join(
+            editor.current_editor_buffer.location, name_under_cursor))
+
+        editor.window_arrangement.open_buffer(
+            new_path, show_in_current_window=True)
+        editor.sync_with_prompt_toolkit()
 
     return kb
 

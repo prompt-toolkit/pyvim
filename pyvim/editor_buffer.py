@@ -36,6 +36,9 @@ class EditorBuffer(object):
         #: is_new: True when this file does not yet exist in the storage.
         self.is_new = True
 
+        # Empty if not in file explorer mode, directory path otherwise.
+        self.isdir = False
+
         # Read text.
         if location:
             text = self._read(location)
@@ -67,6 +70,13 @@ class EditorBuffer(object):
         """
         return self._file_content != self.buffer.text
 
+    @property
+    def in_file_explorer_mode(self):
+        """
+        True when we are in file explorer mode (when this is a directory).
+        """
+        return self.isdir
+
     def _read(self, location):
         """
         Read file I/O backend.
@@ -75,6 +85,8 @@ class EditorBuffer(object):
             if io.can_open_location(location):
                 # Found an I/O backend.
                 exists = io.exists(location)
+                self.isdir = io.isdir(location)
+
                 if exists in (True, NotImplemented):
                     # File could exist. Read it.
                     self.is_new = False

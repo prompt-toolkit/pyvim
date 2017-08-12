@@ -44,3 +44,9 @@ class EditorIO(six.with_metaclass(ABCMeta, object)):
         Write file to storage.
         Can raise IOError.
         """
+
+    def isdir(self, location):
+        """
+        Return whether this location is a directory.
+        """
+        return False
