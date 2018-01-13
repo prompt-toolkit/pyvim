@@ -1,11 +1,8 @@
 from __future__ import unicode_literals
 
-from prompt_toolkit.filters import Condition, HasFocus, Filter, ViInsertMode, ViNavigationMode
-from prompt_toolkit.key_binding.defaults import load_key_bindings
-from prompt_toolkit.keys import Keys
-from prompt_toolkit.layout.utils import find_window_for_buffer_name
-
-from .enums import COMMAND_BUFFER
+from prompt_toolkit.application import get_app
+from prompt_toolkit.filters import Condition, has_focus, vi_insert_mode, vi_navigation_mode
+from prompt_toolkit.key_binding import KeyBindings
 
 __all__ = (
     'create_key_bindings',
@@ -16,7 +13,7 @@ def _current_window_for_event(event):
     """
     Return the `Window` for the currently focussed Buffer.
     """
-    return find_window_for_buffer_name(event.cli.layout, event.cli.current_buffer_name)
+    return event.app.layout.current_window
 
 
 def create_key_bindings(editor):
@@ -26,21 +23,20 @@ def create_key_bindings(editor):
     This starts with the key bindings, defined by `prompt-toolkit`, but adds
     the ones which are specific for the editor.
     """
-    # Create new Key binding manager.
-    registry = load_key_bindings(
-        enable_search=True,
-        enable_extra_page_navigation=True,
-        enable_system_bindings=True)
+    kb = KeyBindings()
 
     # Filters.
-    vi_buffer_focussed = Condition(lambda cli: cli.current_buffer_name.startswith('buffer-'))
+    @Condition
+    def vi_buffer_focussed():
+        app = get_app()
+        if app.layout.has_focus(editor.search_buffer) or app.layout.has_focus(editor.command_buffer):
+            return False
+        return True
 
-    in_insert_mode = ViInsertMode() & vi_buffer_focussed
-    in_navigation_mode = ViNavigationMode() & vi_buffer_focussed
+    in_insert_mode = vi_insert_mode & vi_buffer_focussed
+    in_navigation_mode = vi_navigation_mode & vi_buffer_focussed
 
-    handle = registry.add_binding
-
-    @handle(Keys.ControlT)
+    @kb.add('c-t')
     def _(event):
         """
         Override default behaviour of prompt-toolkit.
@@ -49,12 +45,12 @@ def create_key_bindings(editor):
         """
         pass
 
-    @handle(Keys.ControlT, filter=in_insert_mode)
+    @kb.add('c-t', filter=in_insert_mode)
     def indent_line(event):
         """
         Indent current line.
         """
-        b = event.cli.current_buffer
+        b = event.application.current_buffer
 
         # Move to start of line.
         pos = b.document.get_start_of_line_position(after_whitespace=True)
@@ -69,50 +65,49 @@ def create_key_bindings(editor):
         # Restore cursor.
         b.cursor_position -= pos
 
-    @handle(Keys.ControlR, filter=in_navigation_mode, save_before=(lambda e: False))
+    @kb.add('c-r', filter=in_navigation_mode, save_before=(lambda e: False))
     def redo(event):
         """
         Redo.
         """
-        event.cli.current_buffer.redo()
+        event.app.current_buffer.redo()
 
-    @handle(':', filter=in_navigation_mode)
+    @kb.add(':', filter=in_navigation_mode)
     def enter_command_mode(event):
         """
         Entering command mode.
         """
         editor.enter_command_mode()
 
-    @handle(Keys.Tab, filter=ViInsertMode() &
-            ~HasFocus(COMMAND_BUFFER) & WhitespaceBeforeCursorOnLine())
+    @kb.add('tab', filter=vi_insert_mode &
+            ~has_focus(editor.command_buffer) & whitespace_before_cursor_on_line)
     def autocomplete_or_indent(event):
         """
         When the 'tab' key is pressed with only whitespace character before the
         cursor, do autocompletion. Otherwise, insert indentation.
         """
-        b = event.cli.current_buffer
+        b = event.app.current_buffer
         if editor.expand_tab:
             b.insert_text('    ')
         else:
             b.insert_text('\t')
 
-    @handle(Keys.Escape, filter=HasFocus(COMMAND_BUFFER))
-    @handle(Keys.ControlC, filter=HasFocus(COMMAND_BUFFER))
-    @handle(
-        Keys.Backspace,
-        filter=HasFocus(COMMAND_BUFFER) & Condition(lambda cli: cli.buffers[COMMAND_BUFFER].text == ''))
+    @kb.add('escape', filter=has_focus(editor.command_buffer))
+    @kb.add('c-c', filter=has_focus(editor.command_buffer))
+    @kb.add('backspace',
+        filter=has_focus(editor.command_buffer) & Condition(lambda: editor.command_buffer.text == ''))
     def leave_command_mode(event):
         """
         Leaving command mode.
         """
         editor.leave_command_mode()
 
-    @handle(Keys.ControlW, Keys.ControlW, filter=in_navigation_mode)
+    @kb.add('c-w', 'c-w', filter=in_navigation_mode)
     def focus_next_window(event):
         editor.window_arrangement.cycle_focus()
         editor.sync_with_prompt_toolkit()
 
-    @handle(Keys.ControlW, 'n', filter=in_navigation_mode)
+    @kb.add('c-w', 'n', filter=in_navigation_mode)
     def horizontal_split(event):
         """
         Split horizontally.
@@ -120,7 +115,7 @@ def create_key_bindings(editor):
         editor.window_arrangement.hsplit(None)
         editor.sync_with_prompt_toolkit()
 
-    @handle(Keys.ControlW, 'v', filter=in_navigation_mode)
+    @kb.add('c-w', 'v', filter=in_navigation_mode)
     def vertical_split(event):
         """
         Split vertically.
@@ -128,37 +123,37 @@ def create_key_bindings(editor):
         editor.window_arrangement.vsplit(None)
         editor.sync_with_prompt_toolkit()
 
-    @handle('g', 't', filter=in_navigation_mode)
+    @kb.add('g', 't', filter=in_navigation_mode)
     def focus_next_tab(event):
         editor.window_arrangement.go_to_next_tab()
         editor.sync_with_prompt_toolkit()
 
-    @handle('g', 'T', filter=in_navigation_mode)
+    @kb.add('g', 'T', filter=in_navigation_mode)
     def focus_previous_tab(event):
         editor.window_arrangement.go_to_previous_tab()
         editor.sync_with_prompt_toolkit()
 
-    @handle(Keys.ControlJ, filter=in_navigation_mode)
+    @kb.add('enter', filter=in_navigation_mode)
     def goto_line_beginning(event):
         """ Enter in navigation mode should move to the start of the next line. """
         b = event.current_buffer
         b.cursor_down(count=event.arg)
         b.cursor_position += b.document.get_start_of_line_position(after_whitespace=True)
 
-    @handle(Keys.F1)
+    @kb.add('f1')
     def show_help(event):
         editor.show_help()
 
-    return registry
+    return kb
 
 
-class WhitespaceBeforeCursorOnLine(Filter):
+@Condition
+def whitespace_before_cursor_on_line():
     """
     Filter which evaluates to True when the characters before the cursor are
     whitespace, or we are at the start of te line.
     """
-    def __call__(self, cli):
-        b = cli.current_buffer
-        before_cursor = b.document.current_line_before_cursor
+    b = get_app().current_buffer
+    before_cursor = b.document.current_line_before_cursor
 
-        return bool(not before_cursor or before_cursor[-1].isspace())
+    return bool(not before_cursor or before_cursor[-1].isspace())

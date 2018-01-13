@@ -2,27 +2,23 @@
 The actual layout for the renderer.
 """
 from __future__ import unicode_literals
-from prompt_toolkit.filters import HasFocus, HasSearch, Condition, HasArg, Always
+from prompt_toolkit.application.current import get_app
+from prompt_toolkit.filters import has_focus, is_searching, Condition, has_arg
 from prompt_toolkit.key_binding.vi_state import InputMode
-from prompt_toolkit.layout import HSplit, VSplit, FloatContainer, Float
-from prompt_toolkit.layout.containers import Window, ConditionalContainer, ScrollOffsets, ColorColumn
-from prompt_toolkit.layout.controls import BufferControl, FillControl
-from prompt_toolkit.layout.controls import TokenListControl
-from prompt_toolkit.layout.dimension import LayoutDimension
-from prompt_toolkit.layout.margins import ConditionalMargin, NumberredMargin
+from prompt_toolkit.layout import HSplit, VSplit, FloatContainer, Float, Layout
+from prompt_toolkit.layout.containers import Window, ConditionalContainer, ColorColumn, WindowAlign, ScrollOffsets
+from prompt_toolkit.layout.controls import BufferControl
+from prompt_toolkit.layout.controls import FormattedTextControl
+from prompt_toolkit.layout.dimension import Dimension
+from prompt_toolkit.layout.margins import ConditionalMargin, NumberedMargin
 from prompt_toolkit.layout.menus import CompletionsMenu
-from prompt_toolkit.layout.processors import Processor, ConditionalProcessor, BeforeInput, ShowTrailingWhiteSpaceProcessor, Transformation, HighlightSelectionProcessor, HighlightSearchProcessor, HighlightMatchingBracketProcessor, TabsProcessor, DisplayMultipleCursors
-from prompt_toolkit.layout.screen import Char
-from prompt_toolkit.layout.toolbars import TokenListToolbar, SystemToolbar, SearchToolbar, ValidationToolbar, CompletionsToolbar
-from prompt_toolkit.layout.utils import explode_tokens
-from prompt_toolkit.mouse_events import MouseEventTypes
-from prompt_toolkit.reactive import Integer
+from prompt_toolkit.layout.processors import Processor, ConditionalProcessor, BeforeInput, ShowTrailingWhiteSpaceProcessor, Transformation, HighlightSelectionProcessor, HighlightSearchProcessor, HighlightIncrementalSearchProcessor, HighlightMatchingBracketProcessor, TabsProcessor, DisplayMultipleCursors
+from prompt_toolkit.layout.utils import explode_text_fragments
+from prompt_toolkit.mouse_events import MouseEventType
 from prompt_toolkit.selection import SelectionType
-
-from pygments.token import Token
+from prompt_toolkit.widgets.toolbars import FormattedTextToolbar, SystemToolbar, SearchToolbar, ValidationToolbar, CompletionsToolbar
 
 from .commands.lexer import create_command_lexer
-from .enums import COMMAND_BUFFER
 from .lexer import DocumentLexer
 from .welcome_message import WELCOME_MESSAGE_TOKENS, WELCOME_MESSAGE_HEIGHT, WELCOME_MESSAGE_WIDTH
 
@@ -50,7 +46,7 @@ def _try_char(character, backup, encoding=sys.stdout.encoding):
 TABSTOP_DOT = _try_char('\u2508', '.')
 
 
-class TabsControl(TokenListControl):
+class TabsControl(FormattedTextControl):
     """
     Displays the tabs at the top of the screen, when there is more than one
     open tab.
@@ -61,15 +57,15 @@ class TabsControl(TokenListControl):
 
         def create_tab_handler(index):
             " Return a mouse handler for this tab. Select the tab on click. "
-            def handler(cli, mouse_event):
-                if mouse_event.event_type == MouseEventTypes.MOUSE_DOWN:
+            def handler(app, mouse_event):
+                if mouse_event.event_type == MouseEventType.MOUSE_DOWN:
                     editor.window_arrangement.active_tab_index = index
                     editor.sync_with_prompt_toolkit()
                 else:
                     return NotImplemented
             return handler
 
-        def get_tokens(cli):
+        def get_tokens():
             selected_tab_index = editor.window_arrangement.active_tab_index
 
             result = []
@@ -83,36 +79,36 @@ class TabsControl(TokenListControl):
                 handler = create_tab_handler(i)
 
                 if i == selected_tab_index:
-                    append((Token.TabBar.Tab.Active, ' %s ' % caption, handler))
+                    append(('class:tabbar.tab.active', ' %s ' % caption, handler))
                 else:
-                    append((Token.TabBar.Tab, ' %s ' % caption, handler))
-                append((Token.TabBar, ' '))
+                    append(('class:tabbar.tab', ' %s ' % caption, handler))
+                append(('class:tabbar', ' '))
 
             return result
 
-        super(TabsControl, self).__init__(get_tokens, Char(token=Token.TabBar))
+        super(TabsControl, self).__init__(get_tokens, style='class:tabbar')
 
 
 class TabsToolbar(ConditionalContainer):
     def __init__(self, editor):
         super(TabsToolbar, self).__init__(
-            Window(TabsControl(editor), height=LayoutDimension.exact(1)),
-            filter=Condition(lambda cli: len(editor.window_arrangement.tab_pages) > 1))
+            Window(TabsControl(editor), height=1),
+            filter=Condition(lambda: len(editor.window_arrangement.tab_pages) > 1))
 
 
 class CommandLine(ConditionalContainer):
     """
     The editor command line. (For at the bottom of the screen.)
     """
-    def __init__(self):
+    def __init__(self, editor):
         super(CommandLine, self).__init__(
             Window(
                 BufferControl(
-                    buffer_name=COMMAND_BUFFER,
-                    input_processors=[BeforeInput.static(':')],
+                    buffer=editor.command_buffer,
+                    input_processors=[BeforeInput(':')],
                     lexer=create_command_lexer()),
-                height=LayoutDimension.exact(1)),
-            filter=HasFocus(COMMAND_BUFFER))
+                height=1),
+            filter=has_focus(editor.command_buffer))
 
 
 class WelcomeMessageWindow(ConditionalContainer):
@@ -123,7 +119,7 @@ class WelcomeMessageWindow(ConditionalContainer):
     def __init__(self, editor):
         once_hidden = [False]  # Nonlocal
 
-        def condition(cli):
+        def condition():
             # Get editor buffers
             buffers = editor.window_arrangement.editor_buffers
 
@@ -136,20 +132,26 @@ class WelcomeMessageWindow(ConditionalContainer):
             return result
 
         super(WelcomeMessageWindow, self).__init__(
-            Window(TokenListControl(lambda cli: WELCOME_MESSAGE_TOKENS)),
+            Window(
+                FormattedTextControl(lambda: WELCOME_MESSAGE_TOKENS),
+                align=WindowAlign.CENTER,
+                style="class:welcome"),
             filter=Condition(condition))
 
 
-def _bufferlist_overlay_visible_condition(cli):
+def _bufferlist_overlay_visible(editor):
     """
     True when the buffer list overlay should be displayed.
     (This is when someone starts typing ':b' or ':buffer' in the command line.)
     """
-    text = cli.buffers[COMMAND_BUFFER].text.lstrip()
-    return cli.current_buffer_name == COMMAND_BUFFER and (
-            any(text.startswith(p) for p in ['b ', 'b! ', 'buffer', 'buffer!']))
+    @Condition
+    def overlay_is_visible():
+        app = get_app()
 
-bufferlist_overlay_visible_filter = Condition(_bufferlist_overlay_visible_condition)
+        text = editor.command_buffer.text.lstrip()
+        return app.layout.has_focus(editor.command_buffer) and (
+                any(text.startswith(p) for p in ['b ', 'b! ', 'buffer', 'buffer!']))
+    return overlay_is_visible
 
 
 class BufferListOverlay(ConditionalContainer):
@@ -158,8 +160,6 @@ class BufferListOverlay(ConditionalContainer):
     inside the vim command line.
     """
     def __init__(self, editor):
-        token = Token.BufferList
-
         def highlight_location(location, search_string, default_token):
             """
             Return a tokenlist with the `search_string` highlighted.
@@ -169,15 +169,19 @@ class BufferListOverlay(ConditionalContainer):
             # Replace token of matching positions.
             for m in re.finditer(re.escape(search_string), location):
                 for i in range(m.start(), m.end()):
-                    result[i] = (token.SearchMatch, result[i][1])
+                    result[i] = ('class:searchmatch', result[i][1])
+
+            if location == search_string:
+                result[0] = (result[0][0] + ' [SetCursorPosition]', result[0][1])
+
             return result
 
-        def get_tokens(cli):
+        def get_tokens():
             wa = editor.window_arrangement
             buffer_infos = wa.list_open_buffers()
 
             # Filter infos according to typed text.
-            input_params = cli.buffers[COMMAND_BUFFER].text.lstrip().split(None, 1)
+            input_params = editor.command_buffer.text.lstrip().split(None, 1)
             search_string = input_params[1] if len(input_params) > 1 else ''
 
             if search_string:
@@ -194,10 +198,10 @@ class BufferListOverlay(ConditionalContainer):
                         return True
 
                     # When this entry is part of the current completions list.
-                    b = cli.buffers[COMMAND_BUFFER]
+                    b = editor.command_buffer
 
                     if b.complete_state and any(info.editor_buffer.location in c.display
-                                                for c in b.complete_state.current_completions
+                                                for c in b.complete_state.completions
                                                 if info.editor_buffer.location is not None):
                         return True
 
@@ -207,13 +211,13 @@ class BufferListOverlay(ConditionalContainer):
 
             # Render output.
             if len(buffer_infos) == 0:
-                return [(token, ' No match found. ')]
+                return [('', ' No match found. ')]
             else:
                 result = []
 
                 # Create title.
-                result.append((token, '  '))
-                result.append((token.Title, 'Open buffers\n'))
+                result.append(('', '  '))
+                result.append(('class:title', 'Open buffers\n'))
 
                 # Get length of longest location
                 max_location_len = max(len(info.editor_buffer.get_display_name()) for info in buffer_infos)
@@ -224,10 +228,10 @@ class BufferListOverlay(ConditionalContainer):
                     char = '%' if info.is_active else ' '
                     char2 = 'a' if info.is_visible else ' '
                     char3 = ' + ' if info.editor_buffer.has_unsaved_changes else '   '
-                    t = token.Active if info.is_active else token
+                    t = 'class:active' if info.is_active else ''
 
                     result.extend([
-                        (token, ' '),
+                        ('', ' '),
                         (t, '%3i ' % info.index),
                         (t, '%s' % char),
                         (t, '%s ' % char2),
@@ -236,39 +240,41 @@ class BufferListOverlay(ConditionalContainer):
                     result.extend(highlight_location(eb.get_display_name(), search_string, t))
                     result.extend([
                         (t, ' ' * (max_location_len - len(eb.get_display_name()))),
-                        (t.Lineno, '  line %i' % (eb.buffer.document.cursor_position_row + 1)),
+                        (t + ' class:lineno', '  line %i' % (eb.buffer.document.cursor_position_row + 1)),
                         (t, ' \n')
                     ])
                 return result
 
         super(BufferListOverlay, self).__init__(
-            Window(TokenListControl(get_tokens, default_char=Char(token=token))),
-            filter=bufferlist_overlay_visible_filter)
+            Window(FormattedTextControl(get_tokens),
+                   style='class:bufferlist',
+                   scroll_offsets=ScrollOffsets(top=1, bottom=1)),
+            filter=_bufferlist_overlay_visible(editor))
 
 
-class MessageToolbarBar(TokenListToolbar):
+class MessageToolbarBar(ConditionalContainer):
     """
     Pop-up (at the bottom) for showing error/status messages.
     """
     def __init__(self, editor):
-        def get_tokens(cli):
+        def get_tokens():
             if editor.message:
-                return [(Token.Message, editor.message)]
+                return [('class:message', editor.message)]
             else:
                 return []
 
         super(MessageToolbarBar, self).__init__(
-                get_tokens,
-                filter=Condition(lambda cli: editor.message is not None))
+            FormattedTextToolbar(get_tokens),
+            filter=Condition(lambda: editor.message is not None))
 
 
-class ReportMessageToolbar(TokenListToolbar):
+class ReportMessageToolbar(ConditionalContainer):
     """
     Toolbar that shows the messages, given by the reporter.
     (It shows the error message, related to the current line.)
     """
     def __init__(self, editor):
-        def get_tokens(cli):
+        def get_formatted_text():
             eb = editor.window_arrangement.active_editor_buffer
 
             lineno = eb.buffer.document.cursor_position_row
@@ -276,30 +282,32 @@ class ReportMessageToolbar(TokenListToolbar):
 
             for e in errors:
                 if e.lineno == lineno:
-                    return e.message_token_list
+                    return e.formatted_text
 
             return []
 
         super(ReportMessageToolbar, self).__init__(
-                get_tokens,
-                filter=~HasFocus(COMMAND_BUFFER) & ~HasSearch() & ~HasFocus('system'))
+                FormattedTextToolbar(get_formatted_text),
+                filter=~has_focus(editor.command_buffer) & ~is_searching & ~has_focus('system'))
 
 
-class WindowStatusBar(TokenListToolbar):
+class WindowStatusBar(FormattedTextToolbar):
     """
     The status bar, which is shown below each window in a tab page.
     """
     def __init__(self, editor, editor_buffer):
-        def get_tokens(cli):
-            insert_mode = cli.vi_state.input_mode in (InputMode.INSERT, InputMode.INSERT_MULTIPLE)
-            replace_mode = cli.vi_state.input_mode == InputMode.REPLACE
-            sel = cli.buffers[editor_buffer.buffer_name].selection_state
+        def get_text():
+            app = get_app()
+
+            insert_mode = app.vi_state.input_mode in (InputMode.INSERT, InputMode.INSERT_MULTIPLE)
+            replace_mode = app.vi_state.input_mode == InputMode.REPLACE
+            sel = editor_buffer.buffer.selection_state
             visual_line = sel is not None and sel.type == SelectionType.LINES
             visual_block = sel is not None and sel.type == SelectionType.BLOCK
             visual_char = sel is not None and sel.type == SelectionType.CHARACTERS
 
             def mode():
-                if cli.current_buffer_name == editor_buffer.buffer_name:
+                if get_app().layout.has_focus(editor_buffer.buffer):
                     if insert_mode:
                         if editor.paste_mode:
                             return ' -- INSERT (paste)--'
@@ -315,15 +323,24 @@ class WindowStatusBar(TokenListToolbar):
                         return ' -- VISUAL --'
                 return '                     '
 
-            return [
-                (Token.Toolbar.Status, ' '),
-                (Token.Toolbar.Status, editor_buffer.location or ''),
-                (Token.Toolbar.Status, ' [New File]' if editor_buffer.is_new else ''),
-                (Token.Toolbar.Status, '*' if editor_buffer.has_unsaved_changes else ''),
-                (Token.Toolbar.Status, ' '),
-                (Token.Toolbar.Status, mode()),
-            ]
-        super(WindowStatusBar, self).__init__(get_tokens, default_char=Char(' ', Token.Toolbar.Status))
+            def recording():
+                if app.vi_state.recording_register:
+                    return 'recording '
+                else:
+                    return ''
+
+            return ''.join([
+                ' ',
+                recording(),
+                (editor_buffer.location or ''),
+                (' [New File]' if editor_buffer.is_new else ''),
+                ('*' if editor_buffer.has_unsaved_changes else ''),
+                (' '),
+                mode(),
+            ])
+        super(WindowStatusBar, self).__init__(
+            get_text,
+            style='class:toolbar.status')
 
 
 class WindowStatusBarRuler(ConditionalContainer):
@@ -331,7 +348,7 @@ class WindowStatusBarRuler(ConditionalContainer):
     The right side of the Vim toolbar, showing the location of the cursor in
     the file, and the vectical scroll percentage.
     """
-    def __init__(self, editor, buffer_window, buffer_name):
+    def __init__(self, editor, buffer_window, buffer):
         def get_scroll_text():
             info = buffer_window.render_info
 
@@ -348,23 +365,26 @@ class WindowStatusBarRuler(ConditionalContainer):
 
             return ''
 
-        def get_tokens(cli):
-            main_document = cli.buffers[buffer_name].document
+        def get_tokens():
+            main_document = buffer.document
 
             return [
-                (Token.Toolbar.Status.CursorPosition, '(%i,%i)' % (main_document.cursor_position_row + 1,
-                                                            main_document.cursor_position_col + 1)),
-                (Token.Toolbar.Status, ' - '),
-                (Token.Toolbar.Status.Percentage, get_scroll_text()),
-                (Token.Toolbar.Status, ' '),
+                ('class:cursorposition', '(%i,%i)' % (main_document.cursor_position_row + 1,
+                                                      main_document.cursor_position_col + 1)),
+                ('', ' - '),
+                ('class:percentage', get_scroll_text()),
+                ('', ' '),
             ]
 
         super(WindowStatusBarRuler, self).__init__(
             Window(
-                TokenListControl(get_tokens, default_char=Char(' ', Token.Toolbar.Status), align_right=True),
-                height=LayoutDimension.exact(1),
-              ),
-            filter=Condition(lambda cli: editor.show_ruler))
+                FormattedTextControl(get_tokens),
+                char=' ',
+                align=WindowAlign.RIGHT,
+                style='class:toolbar.status',
+                height=1,
+            ),
+            filter=Condition(lambda: editor.show_ruler))
 
 
 class SimpleArgToolbar(ConditionalContainer):
@@ -372,15 +392,16 @@ class SimpleArgToolbar(ConditionalContainer):
     Simple control showing the Vi repeat arg.
     """
     def __init__(self):
-        def get_tokens(cli):
-            if cli.input_processor.arg is not None:
-                return [(Token.Arg, ' %s ' % cli.input_processor.arg)]
+        def get_tokens():
+            arg = get_app().key_processor.arg
+            if arg is not None:
+                return [('class:arg', ' %s ' % arg)]
             else:
                 return []
 
         super(SimpleArgToolbar, self).__init__(
-            Window(TokenListControl(get_tokens, align_right=True)),
-            filter=HasArg()),
+            Window(FormattedTextControl(get_tokens), align=WindowAlign.RIGHT),
+            filter=has_arg),
 
 
 class PyvimScrollOffsets(ScrollOffsets):
@@ -422,13 +443,14 @@ class EditorLayout(object):
                 Float(xcursor=True, ycursor=True,
                       content=CompletionsMenu(max_height=12,
                                               scroll_offset=2,
-                                              extra_filter=~HasFocus(COMMAND_BUFFER))),
+                                              extra_filter=~has_focus(editor.command_buffer))),
                 Float(content=BufferListOverlay(editor), bottom=1, left=0),
                 Float(bottom=1, left=0, right=0, height=1,
-                      content=CompletionsToolbar(
-                          extra_filter=HasFocus(COMMAND_BUFFER) &
-                                       ~bufferlist_overlay_visible_filter &
-                                       Condition(lambda cli: editor.show_wildmenu))),
+                      content=ConditionalContainer(
+                          CompletionsToolbar(),
+                          filter=has_focus(editor.command_buffer) &
+                                       ~_bufferlist_overlay_visible(editor) &
+                                       Condition(lambda: editor.show_wildmenu))),
                 Float(bottom=1, left=0, right=0, height=1,
                       content=ValidationToolbar()),
                 Float(bottom=1, left=0, right=0, height=1,
@@ -439,25 +461,27 @@ class EditorLayout(object):
             ]
         )
 
-        self.layout = FloatContainer(
+        search_toolbar = SearchToolbar(vi_mode=True, search_buffer=editor.search_buffer)
+        self.search_control = search_toolbar.control
+
+        self.layout = Layout(FloatContainer(
             content=HSplit([
                 TabsToolbar(editor),
                 self._fc,
-                CommandLine(),
+                CommandLine(editor),
                 ReportMessageToolbar(editor),
                 SystemToolbar(),
-                SearchToolbar(vi_mode=True),
+                search_toolbar,
             ]),
             floats=[
                 Float(right=0, height=1, bottom=0, width=5,
                       content=SimpleArgToolbar()),
             ]
-        )
+        ))
 
-    def get_vertical_border_char(self, cli):
+    def get_vertical_border_char(self):
         " Return the character to be used for the vertical border. "
-        return Char(char=_try_char('\u2502', '|', cli.output.encoding()),
-                    token=Token.FrameBorder)
+        return _try_char('\u2502', '|', get_app().output.encoding())
 
     def update(self):
         """
@@ -474,20 +498,20 @@ class EditorLayout(object):
                 key = (node, node.editor_buffer)
                 frame = existing_frames.get(key)
                 if frame is None:
-                    frame = self._create_window_frame(node.editor_buffer)
+                    frame, pt_window = self._create_window_frame(node.editor_buffer)
+
+                    # Link layout Window to arrangement.
+                    node.pt_window = pt_window
+
                 self._frames[key] = frame
                 return frame
 
             elif isinstance(node, window_arrangement.VSplit):
-                children = []
-                for n in node:
-                    children.append(create_layout_from_node(n))
-                    children.append(
-                        Window(width=LayoutDimension.exact(1),
-                               content=FillControl(
-                                   get_char=self.get_vertical_border_char)))
-                children.pop()
-                return VSplit(children)
+                return VSplit(
+                    [create_layout_from_node(n) for n in node],
+                    padding=1,
+                    padding_char=self.get_vertical_border_char(),
+                    padding_style='class:frameborder')
 
             if isinstance(node, window_arrangement.HSplit):
                 return HSplit([create_layout_from_node(n) for n in node])
@@ -500,43 +524,43 @@ class EditorLayout(object):
         Create a Window for the buffer, with underneat a status bar.
         """
         @Condition
-        def wrap_lines(cli):
+        def wrap_lines():
             return self.editor.wrap_lines
 
         window = Window(
             self._create_buffer_control(editor_buffer),
-            allow_scroll_beyond_bottom=Always(),
+            allow_scroll_beyond_bottom=True,
             scroll_offsets=ScrollOffsets(
                 left=0, right=0,
-                top=Integer.from_callable(lambda: self.editor.scroll_offset),
-                bottom=Integer.from_callable(lambda: self.editor.scroll_offset)),
+                top=(lambda: self.editor.scroll_offset),
+                bottom=(lambda: self.editor.scroll_offset)),
             wrap_lines=wrap_lines,
             left_margins=[ConditionalMargin(
-                    margin=NumberredMargin(
+                    margin=NumberedMargin(
                         display_tildes=True,
-                        relative=Condition(lambda cli: self.editor.relative_number)),
-                    filter=Condition(lambda cli: self.editor.show_line_numbers))],
-            cursorline=Condition(lambda cli: self.editor.cursorline),
-            cursorcolumn=Condition(lambda cli: self.editor.cursorcolumn),
-            get_colorcolumns=(
-                lambda cli: [ColorColumn(pos) for pos in self.editor.colorcolumn]))
+                        relative=Condition(lambda: self.editor.relative_number)),
+                    filter=Condition(lambda: self.editor.show_line_numbers))],
+            cursorline=Condition(lambda: self.editor.cursorline),
+            cursorcolumn=Condition(lambda: self.editor.cursorcolumn),
+            colorcolumns=(
+                lambda: [ColorColumn(pos) for pos in self.editor.colorcolumn]),
+            ignore_content_width=True,
+            ignore_content_height=True)
 
         return HSplit([
             window,
             VSplit([
                 WindowStatusBar(self.editor, editor_buffer),
-                WindowStatusBarRuler(self.editor, window, editor_buffer.buffer_name),
-            ]),
-        ])
+                WindowStatusBarRuler(self.editor, window, editor_buffer.buffer),
+            ], width=Dimension()),  # Ignore actual status bar width.
+        ]), window
 
     def _create_buffer_control(self, editor_buffer):
         """
         Create a new BufferControl for a given location.
         """
-        buffer_name = editor_buffer.buffer_name
-
         @Condition
-        def preview_search(cli):
+        def preview_search():
             return self.editor.incsearch
 
         input_processors = [
@@ -545,13 +569,13 @@ class EditorLayout(object):
             # selected.)
             ConditionalProcessor(
                 ShowTrailingWhiteSpaceProcessor(),
-                Condition(lambda cli: self.editor.display_unprintable_characters)),
+                Condition(lambda: self.editor.display_unprintable_characters)),
 
             # Replace tabs by spaces.
             TabsProcessor(
-                tabstop=Integer.from_callable(lambda: self.editor.tabstop),
-                get_char1=(lambda cli: '|' if self.editor.display_unprintable_characters else ' '),
-                get_char2=(lambda cli: _try_char('\u2508', '.', cli.output.encoding())
+                tabstop=(lambda: self.editor.tabstop),
+                char1=(lambda: '|' if self.editor.display_unprintable_characters else ' '),
+                char2=(lambda: _try_char('\u2508', '.', get_app().output.encoding())
                                        if self.editor.display_unprintable_characters else ' '),
             ),
 
@@ -559,17 +583,22 @@ class EditorLayout(object):
             ReportingProcessor(editor_buffer),
             HighlightSelectionProcessor(),
             ConditionalProcessor(
-                HighlightSearchProcessor(preview_search=preview_search),
-                Condition(lambda cli: self.editor.highlight_search)),
+                HighlightSearchProcessor(),
+                Condition(lambda: self.editor.highlight_search)),
+            ConditionalProcessor(
+                HighlightIncrementalSearchProcessor(),
+                Condition(lambda: self.editor.highlight_search) & preview_search),
             HighlightMatchingBracketProcessor(),
-            DisplayMultipleCursors(buffer_name),
+            DisplayMultipleCursors(),
         ]
 
-        return BufferControl(lexer=DocumentLexer(editor_buffer),
-                             input_processors=input_processors,
-                             buffer_name=buffer_name,
-                             preview_search=preview_search,
-                             focus_on_click=True)
+        return BufferControl(
+            lexer=DocumentLexer(editor_buffer),
+            input_processors=input_processors,
+            buffer=editor_buffer.buffer,
+            preview_search=preview_search,
+            search_buffer_control=self.search_control,
+            focus_on_click=True)
 
 
 class ReportingProcessor(Processor):
@@ -579,16 +608,18 @@ class ReportingProcessor(Processor):
     def __init__(self, editor_buffer):
         self.editor_buffer = editor_buffer
 
-    def apply_transformation(self, cli, document, lineno, source_to_display, tokens):
+    def apply_transformation(self, transformation_input): 
+        fragments = transformation_input.fragments
+
         if self.editor_buffer.report_errors:
             for error in self.editor_buffer.report_errors:
-                if error.lineno == lineno:
-                    tokens = explode_tokens(tokens)
+                if error.lineno == transformation_input.lineno:
+                    fragments = explode_text_fragments(fragments)
                     for i in range(error.start_column, error.end_column):
-                        if i < len(tokens):
-                            tokens[i] = (Token.FlakesError, tokens[i][1])
+                        if i < len(fragments):
+                            fragments[i] = ('class:flakeserror', fragments[i][1])
 
-        return Transformation(tokens)
+        return Transformation(fragments)
 
 
 

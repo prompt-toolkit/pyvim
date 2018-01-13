@@ -14,8 +14,6 @@ import pyflakes.api
 import string
 import six
 
-from pygments.token import Token
-
 __all__ = (
     'report',
 )
@@ -25,11 +23,11 @@ class ReporterError(object):
     """
     Error found by a reporter.
     """
-    def __init__(self, lineno, start_column, end_column, message_token_list):
+    def __init__(self, lineno, start_column, end_column, formatted_text):
         self.lineno = lineno  # Zero based line number.
         self.start_column = start_column
         self.end_column = end_column
-        self.message_token_list = message_token_list
+        self.formatted_text = formatted_text
 
 
 def report(location, document):
@@ -60,9 +58,9 @@ def report_pyflakes(document):
 
     def format_flake_message(message):
         return [
-            (Token.FlakeMessage.Prefix, 'pyflakes:'),
-            (Token, ' '),
-            (Token.FlakeMessage, message.message % message.message_args)
+            ('class:flakemessage.prefix', 'pyflakes:'),
+            ('', ' '),
+            ('class:flakemessage', message.message % message.message_args)
         ]
 
     def message_to_reporter_error(message):
@@ -75,7 +73,7 @@ def report_pyflakes(document):
         return ReporterError(lineno=message.lineno - 1,
                              start_column=message.col,
                              end_column=message.col + end_index - start_index,
-                             message_token_list=format_flake_message(message))
+                             formatted_text=format_flake_message(message))
 
     # Construct list of ReporterError instances.
     return [message_to_reporter_error(m) for m in reporter.messages]

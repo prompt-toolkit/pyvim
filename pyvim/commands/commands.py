@@ -1,7 +1,7 @@
 from __future__ import unicode_literals, print_function
+from prompt_toolkit.application import run_in_terminal
 import os
 import six
-import sys
 
 __all__ = (
     'has_command_handler',
@@ -221,7 +221,7 @@ def buffer_list(editor):
             print(' %3i %-2s %-20s  line %i' % (
                   info.index, char, eb.location, (eb.buffer.document.cursor_position_row + 1)))
         six.moves.input('\nPress ENTER to continue...')
-    editor.cli.run_in_terminal(handler)
+    run_in_terminal(handler)
 
 
 @_cmd('b')
@@ -293,7 +293,7 @@ def quit(editor, all_=False, force=False):
         editor.show_message('%i more files to edit' % (len(ebs) - 1))
 
     else:
-        editor.cli.set_return_value('')
+        editor.application.exit()
 
 
 @cmd('qa', accepts_force=True)
@@ -327,7 +327,7 @@ def write_and_quit(editor, location, force=False):
     Write file and quit.
     """
     write(editor, location, force=force)
-    editor.cli.set_return_value('')
+    editor.application.exit()
 
 
 @cmd('cq')
@@ -338,7 +338,7 @@ def quit_nonzero(editor):
     # Note: the try/finally in `prompt_toolkit.Interface.read_input`
     # will ensure that the render output is reset, leaving the alternate
     # screen before quiting.
-    sys.exit(1)
+    editor.application.exit()
 
 
 @cmd('wqa')
@@ -398,6 +398,22 @@ def tab_previous(editor):
     Go to previous tab.
     """
     editor.window_arrangement.go_to_previous_tab()
+
+
+@cmd('pwd')
+def pwd(editor):
+    " Print working directory. "
+    directory = os.getcwd()
+    editor.show_message('{}'.format(directory))
+
+
+@location_cmd('cd', accepts_force=False)
+def pwd(editor, location):
+    " Change working directory. "
+    try:
+        os.chdir(location)
+    except OSError as e:
+        editor.show_message('{}'.format(e))
 
 
 @_cmd('colorscheme')
@@ -624,14 +640,14 @@ def disable_mouse(editor):
 @set_cmd('top')
 def enable_tildeop(editor):
     " Enable tilde operator. "
-    editor.cli.vi_state.tilde_operator = True
+    editor.application.vi_state.tilde_operator = True
 
 
 @set_cmd('notildeop')
 @set_cmd('notop')
 def disable_tildeop(editor):
     " Disable tilde operator. "
-    editor.cli.vi_state.tilde_operator = False
+    editor.application.vi_state.tilde_operator = False
 
 
 @set_cmd('cursorline')
@@ -663,9 +679,12 @@ def disable_cursorcolumn(editor):
 @set_cmd('cc', accepts_value=True)
 def set_scroll_offset(editor, value):
     try:
-        value = [int(val) for val in value.split(',')]
+        if value:
+            numbers = [int(val) for val in value.split(',')]
+        else:
+            numbers = []
     except ValueError:
         editor.show_message(
             'Invalid value. Expecting comma separated list of integers')
     else:
-        editor.colorcolumn = value
+        editor.colorcolumn = numbers

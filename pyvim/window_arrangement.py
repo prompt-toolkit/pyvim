@@ -33,6 +33,9 @@ class Window(object):
         assert isinstance(editor_buffer, EditorBuffer)
         self.editor_buffer = editor_buffer
 
+        # The prompt_toolkit layout Window.
+        self.pt_window = None
+
     def __repr__(self):
         return '%s(editor_buffer=%r)' % (self.__class__.__name__, self.editor_buffer)
 
@@ -214,8 +217,6 @@ class WindowArrangement(object):
         self.active_tab_index = None
         self.editor_buffers = []  # List of EditorBuffer
 
-        self._buffer_index = 0  # Index for generating buffer names.
-
     @property
     def editor(self):
         """ The Editor instance. """
@@ -232,6 +233,14 @@ class WindowArrangement(object):
         """ The active EditorBuffer or None. """
         if self.active_tab and self.active_tab.active_window:
             return self.active_tab.active_window.editor_buffer
+
+    @property
+    def active_pt_window(self):
+        " The active prompt_toolkit layout Window. "
+        if self.active_tab:
+            w = self.active_tab.active_window
+            if w:
+                return w.pt_window
 
     def get_editor_buffer_for_location(self, location):
         """
@@ -390,11 +399,8 @@ class WindowArrangement(object):
         if show_in_current_window and self.active_tab:
             self.active_tab.show_editor_buffer(editor_buffer)
 
-        # Add buffer to CLI.
-        self.editor.cli.add_buffer(editor_buffer.buffer_name, editor_buffer.buffer)
-
         # Start reporter.
-        self.editor.run_reporter_for_editor_buffer(editor_buffer)
+        editor_buffer.run_reporter()
 
     def _get_or_create_editor_buffer(self, location=None, text=None):
         """
@@ -406,14 +412,9 @@ class WindowArrangement(object):
         assert location is None or text is None  # Don't pass two of them.
         assert location is None or isinstance(location, string_types)
 
-        def new_name():
-            """ Generate name for new buffer. """
-            self._buffer_index += 1
-            return 'buffer-%i' % self._buffer_index
-
         if location is None:
             # Create and add an empty EditorBuffer
-            eb = EditorBuffer(self.editor, new_name(), text=text)
+            eb = EditorBuffer(self.editor, text=text)
             self._add_editor_buffer(eb)
 
             return eb
@@ -425,7 +426,7 @@ class WindowArrangement(object):
             # Not found? Create one.
             if eb is None:
                 # Create and add EditorBuffer
-                eb = EditorBuffer(self.editor, new_name(), location)
+                eb = EditorBuffer(self.editor, location)
                 self._add_editor_buffer(eb)
 
                 return eb

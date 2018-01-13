@@ -30,7 +30,7 @@ def handle_command(editor, input_string):
 
     elif shell_command is not None:
         # Handle shell commands.
-        editor.cli.run_system_command(shell_command)
+        editor.application.run_system_command(shell_command)
 
     elif has_command_handler(command):
         # Handle other 'normal' commands.
@@ -49,5 +49,5 @@ def _go_to_line(editor, line):
     """
     Move cursor to this line in the current buffer.
     """
-    b = editor.cli.current_buffer
+    b = editor.application.current_buffer
     b.cursor_position = b.document.translate_row_col_to_index(max(0, int(line) - 1), 0)
