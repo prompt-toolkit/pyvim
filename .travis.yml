@@ -1,14 +1,20 @@
 sudo: false
 language: python
-python: '3.5'
-env:
-  - TOXENV=py26
-  - TOXENV=py27
-  - TOXENV=py33
-  - TOXENV=py34
-  - TOXENV=py35
-  - TOXENV=pypy
+
+matrix:
+  include:
+    - python: 3.6
+    - python: 3.5
+    - python: 2.7
+    - python: pypy
+    - python: pypy3
+
 install:
-  - travis_retry pip install tox pytest
+  - pip install .
+  - pip install pytest
+  - pip list
+
 script:
-  - tox
+  - echo "$TRAVIS_PYTHON_VERSION"
+  - cd tests
+  - py.test
