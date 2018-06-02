@@ -1,8 +1,14 @@
 CHANGELOG
 =========
 
-0.0.21: 2017-8-8
-----------------
+2.0.1: 2018-06-02
+-----------------
+
+Upgrade to prompt_toolkit 2.0
+
+
+0.0.21: 2017-08-08
+------------------
 
 - Use load_key_bindings instead of KeyBindingManager (fixes compatibility with
   latest prompt_toolkit 1.0)
