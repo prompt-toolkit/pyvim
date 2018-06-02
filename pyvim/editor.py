@@ -38,8 +38,15 @@ __all__ = (
 class Editor(object):
     """
     The main class. Containing the whole editor.
+
+    :param config_directory: Place where configuration is stored.
+    :param input: (Optionally) `prompt_toolkit.input.Input` object.
+    :param output: (Optionally) `prompt_toolkit.output.Output` object.
     """
-    def __init__(self, config_directory='~/.pyvim'):
+    def __init__(self, config_directory='~/.pyvim', input=None, output=None):
+        self.input = input
+        self.output = output
+
         # Vi options.
         self.show_line_numbers = True
         self.highlight_search = True
@@ -154,6 +161,8 @@ class Editor(object):
         """
         # Create Application.
         application = Application(
+            input=self.input,
+            output=self.output,
             editing_mode=EditingMode.VI,
             layout=self.editor_layout.layout,
             key_bindings=self.key_bindings,

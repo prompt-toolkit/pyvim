@@ -9,10 +9,9 @@ def test_initial(window, tab_page):
     assert tab_page.root == [window]
 
 
-def test_vsplit(tab_page):
+def test_vsplit(editor, tab_page):
     # Create new buffer.
-    b = Buffer()
-    eb = EditorBuffer(b, 'b1')
+    eb = EditorBuffer(editor)
 
     # Insert in tab, by splitting.
     tab_page.vsplit(eb)

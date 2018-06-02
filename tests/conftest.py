@@ -3,17 +3,20 @@ from __future__ import unicode_literals
 import pytest
 
 from prompt_toolkit.buffer import Buffer
+from prompt_toolkit.output import DummyOutput
+from prompt_toolkit.input import DummyInput
+from pyvim.editor import Editor
 from pyvim.window_arrangement import TabPage, EditorBuffer, Window
 
 
 @pytest.fixture
-def prompt_buffer():
-    return Buffer()
+def editor():
+    return Editor(output=DummyOutput(), input=DummyInput())
 
 
 @pytest.fixture
-def editor_buffer(prompt_buffer):
-    return EditorBuffer(prompt_buffer, 'b1')
+def editor_buffer(editor):
+    return EditorBuffer(editor)
 
 
 @pytest.fixture
