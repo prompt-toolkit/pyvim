@@ -594,6 +594,7 @@ class EditorLayout(object):
 
         return BufferControl(
             lexer=DocumentLexer(editor_buffer),
+            include_default_input_processors=False,
             input_processors=input_processors,
             buffer=editor_buffer.buffer,
             preview_search=preview_search,
