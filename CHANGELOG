@@ -1,10 +1,18 @@
 CHANGELOG
 =========
 
+2.0.22: 2018-06-03
+-----------------
+
+- Small fix: don't include default input processors from prompt_toolkit.
+
+
 2.0.1: 2018-06-02
 -----------------
 
 Upgrade to prompt_toolkit 2.0
+
+Edit: By accident, this was uploaded as 2.0.21.
 
 
 0.0.21: 2017-08-08
