@@ -133,13 +133,6 @@ def create_key_bindings(editor):
         editor.window_arrangement.go_to_previous_tab()
         editor.sync_with_prompt_toolkit()
 
-    @kb.add('enter', filter=in_navigation_mode)
-    def goto_line_beginning(event):
-        """ Enter in navigation mode should move to the start of the next line. """
-        b = event.current_buffer
-        b.cursor_down(count=event.arg)
-        b.cursor_position += b.document.get_start_of_line_position(after_whitespace=True)
-
     @kb.add('f1')
     def show_help(event):
         editor.show_help()
