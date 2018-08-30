@@ -302,6 +302,7 @@ class WindowStatusBar(FormattedTextToolbar):
             insert_mode = app.vi_state.input_mode in (InputMode.INSERT, InputMode.INSERT_MULTIPLE)
             replace_mode = app.vi_state.input_mode == InputMode.REPLACE
             sel = editor_buffer.buffer.selection_state
+            temp_navigation = app.vi_state.temporary_navigation_mode
             visual_line = sel is not None and sel.type == SelectionType.LINES
             visual_block = sel is not None and sel.type == SelectionType.BLOCK
             visual_char = sel is not None and sel.type == SelectionType.CHARACTERS
@@ -309,12 +310,17 @@ class WindowStatusBar(FormattedTextToolbar):
             def mode():
                 if get_app().layout.has_focus(editor_buffer.buffer):
                     if insert_mode:
-                        if editor.paste_mode:
+                        if temp_navigation:
+                            return ' -- (insert) --'
+                        elif editor.paste_mode:
                             return ' -- INSERT (paste)--'
                         else:
                             return ' -- INSERT --'
                     elif replace_mode:
-                        return ' -- REPLACE --'
+                        if temp_navigation:
+                            return ' -- (replace) --'
+                        else:
+                            return ' -- REPLACE --'
                     elif visual_block:
                         return ' -- VISUAL BLOCK --'
                     elif visual_line:
