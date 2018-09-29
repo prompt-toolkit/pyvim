@@ -3,7 +3,7 @@
 Pyvim configuration. Save to file to: ~/.pyvimrc
 """
 from prompt_toolkit.filters import ViInsertMode
-from prompt_toolkit.key_binding.input_processor import KeyPress
+from prompt_toolkit.key_binding.key_processor import KeyPress
 from prompt_toolkit.keys import Keys
 from subprocess import call
 import six
@@ -53,7 +53,7 @@ def configure(editor):
 
         (imap jj <esc>)
         """
-        event.cli.input_processor.feed(KeyPress(Keys.Escape))
+        event.cli.key_processor.feed(KeyPress(Keys.Escape))
 
     @editor.add_key_binding(Keys.F9)
     def save_and_execute_python_file(event):
@@ -69,7 +69,7 @@ def configure(editor):
                 return
             else:
                 editor_buffer.write()
-        
+
         # Now run the Python interpreter. But use
         # `CommandLineInterface.run_in_terminal` to go to the background and
         # not destroy the window layout.
