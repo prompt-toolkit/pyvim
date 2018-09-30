@@ -63,6 +63,7 @@ class Editor(object):
         self.scroll_offset = 0  # ':set scrolloff'
         self.relative_number = False  # ':set relativenumber'
         self.wrap_lines = True  # ':set wrap'
+        self.break_indent = False  # ':set breakindent'
         self.cursorline = False  # ':set cursorline'
         self.cursorcolumn = False  # ':set cursorcolumn'
         self.colorcolumn = []  # ':set colorcolumn'. List of integers.

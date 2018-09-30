@@ -624,6 +624,21 @@ def disable_wrap(editor):
     " disable line wrapping. "
     editor.wrap_lines = False
 
+
+@set_cmd('breakindent')
+@set_cmd('bri')
+def enable_breakindent(editor):
+    " Enable the breakindent option. "
+    editor.break_indent = True
+
+
+@set_cmd('nobreakindent')
+@set_cmd('nobri')
+def disable_breakindent(editor):
+    " Enable the breakindent option. "
+    editor.break_indent = False
+
+
 @set_cmd('mouse')
 def enable_mouse(editor):
     " Enable mouse . "

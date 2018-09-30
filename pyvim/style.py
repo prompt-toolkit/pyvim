@@ -87,6 +87,9 @@ style_extensions = {
     'completions-toolbar.arrow':              'bg:#aaddaa #000000 bold',
     'completions-toolbar completion':         'bg:#aaddaa #000000',
     'completions-toolbar current-completion': 'bg:#444444 #ffffff',
+
+    # Soft wrap.
+    'soft-wrap':                          '#888888',
 }
 
 

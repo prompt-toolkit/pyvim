@@ -23,6 +23,7 @@ from .lexer import DocumentLexer
 from .welcome_message import WELCOME_MESSAGE_TOKENS, WELCOME_MESSAGE_HEIGHT, WELCOME_MESSAGE_WIDTH
 
 import pyvim.window_arrangement as window_arrangement
+from functools import partial
 
 import re
 import sys
@@ -551,7 +552,8 @@ class EditorLayout(object):
             colorcolumns=(
                 lambda: [ColorColumn(pos) for pos in self.editor.colorcolumn]),
             ignore_content_width=True,
-            ignore_content_height=True)
+            ignore_content_height=True,
+            get_line_prefix=partial(self._get_line_prefix, editor_buffer.buffer))
 
         return HSplit([
             window,
@@ -607,6 +609,20 @@ class EditorLayout(object):
             search_buffer_control=self.search_control,
             focus_on_click=True)
 
+    def _get_line_prefix(self, buffer, line_number, wrap_count):
+        if wrap_count > 0:
+            result = []
+
+            # Add 'breakindent' prefix.
+            if self.editor.break_indent:
+                line = buffer.document.lines[line_number]
+                prefix = line[:len(line) - len(line.lstrip())]
+                result.append(('', prefix))
+
+            # Add softwrap mark.
+            result.append(('class:soft-wrap', '...'))
+            return result
+        return ''
 
 class ReportingProcessor(Processor):
     """
