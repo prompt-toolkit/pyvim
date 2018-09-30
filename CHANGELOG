@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+2.0.23: 2018-09-30
+------------------
+
+- Implemented "breakindent" option.
+- Implemented "temporary navigation mode".
+
 2.0.22: 2018-06-03
 -----------------
 
