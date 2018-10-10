@@ -157,6 +157,15 @@ def create_key_bindings(editor):
             new_path, show_in_current_window=True)
         editor.sync_with_prompt_toolkit()
 
+    @kb.add('-', filter=in_file_explorer_mode)
+    def to_parent_directory(event):
+        new_path = os.path.normpath(os.path.join(
+            editor.current_editor_buffer.location, '..'))
+
+        editor.window_arrangement.open_buffer(
+            new_path, show_in_current_window=True)
+        editor.sync_with_prompt_toolkit()
+
     return kb
 
 

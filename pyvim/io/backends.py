@@ -115,6 +115,7 @@ class DirectoryIO(EditorIO):
         result.append('" ==================================\n')
         result.append('" Directory Listing\n')
         result.append('"    %s\n' % os.path.abspath(directory))
+        result.append('"    Quick help: -: go up dir\n')
         result.append('" ==================================\n')
         result.append('../\n')
         result.append('./\n')
