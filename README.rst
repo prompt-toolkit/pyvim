@@ -201,6 +201,7 @@ Certainly have a look at the alternatives:
 
 - Kaa: https://github.com/kaaedit/kaa by @atsuoishimoto
 - Vai: https://github.com/stefanoborini/vai by @stefanoborini
+- Vis: https://github.com/martanne/vis by @martanne
 
 
 Q & A:
