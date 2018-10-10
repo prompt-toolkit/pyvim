@@ -191,13 +191,7 @@ class Editor(object):
         """
         Return the `EditorBuffer` that is currently active.
         """
-        # For each buffer name on the focus stack.
-        for current_buffer_name in self.application.buffers.focus_stack:
-            if current_buffer_name is not None:
-                # Find/return the EditorBuffer with this name.
-                for b in self.window_arrangement.editor_buffers:
-                    if b.buffer_name == current_buffer_name:
-                        return b
+        return self.application.current_buffer
 
     @property
     def add_key_binding(self):
