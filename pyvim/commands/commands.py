@@ -411,7 +411,7 @@ def pwd(editor):
 
 @cmd('delete-trailing-whitespace')
 def delete_trailing_whitespace(editor):
-    buffer = editor.current_editor_buffer
+    buffer = editor.current_editor_buffer.buffer
     l = []
     for line in buffer.text.splitlines():
         l.append(line.rstrip())
