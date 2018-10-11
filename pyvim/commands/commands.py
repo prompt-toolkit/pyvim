@@ -1,5 +1,6 @@
 from __future__ import unicode_literals, print_function
 from prompt_toolkit.application import run_in_terminal
+from prompt_toolkit.document import Document
 import os
 import six
 
@@ -406,6 +407,18 @@ def pwd(editor):
     " Print working directory. "
     directory = os.getcwd()
     editor.show_message('{}'.format(directory))
+
+
+@cmd('delete-trailing-whitespace')
+def delete_trailing_whitespace(editor):
+    buffer = editor.current_editor_buffer
+    l = []
+    for line in buffer.text.splitlines():
+        l.append(line.rstrip())
+    buffer.document = Document(
+        text='\n'.join(l),
+        cursor_position=buffer.document.cursor_position
+    )
 
 
 @location_cmd('cd', accepts_force=False)
