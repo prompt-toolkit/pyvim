@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 
 from prompt_toolkit.lexers import Lexer, SimpleLexer, PygmentsLexer
+from pygments.lexer import RegexLexer
+from pygments.token import Token
 
 __all__ = (
     'DocumentLexer',
@@ -21,6 +23,33 @@ class DocumentLexer(Lexer):
         location = self.editor_buffer.location
 
         if location:
+            if self.editor_buffer.in_file_explorer_mode:
+                return PygmentsLexer(DirectoryListingLexer, sync_from_start=False).lex_document(document)
+
             return PygmentsLexer.from_filename(location, sync_from_start=False).lex_document(document)
 
         return SimpleLexer().lex_document(document)
+
+
+_DirectoryListing = Token.DirectoryListing
+
+class DirectoryListingLexer(RegexLexer):
+    """
+    Highlighting of directory listings.
+    """
+    name = 'directory-listing'
+    tokens = {
+        'root': [
+            (r'^".*', _DirectoryListing.Header),
+
+            (r'^\.\./$', _DirectoryListing.ParentDirectory),
+            (r'^\./$', _DirectoryListing.CurrentDirectory),
+
+            (r'^[^"].*/$', _DirectoryListing.Directory),
+            (r'^[^"].*\.(txt|rst|md)$', _DirectoryListing.Textfile),
+            (r'^[^"].*\.(py)$', _DirectoryListing.PythonFile),
+
+            (r'^[^"].*\.(pyc|pyd)$', _DirectoryListing.Tempfile),
+            (r'^\..*$', _DirectoryListing.Dotfile),
+        ]
+    }

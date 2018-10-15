@@ -90,6 +90,16 @@ style_extensions = {
 
     # Soft wrap.
     'soft-wrap':                          '#888888',
+
+    # Directory listing style.
+    'pygments.directorylisting.header':    '#4444ff',
+    'pygments.directorylisting.directory': '#ff4444 bold',
+    'pygments.directorylisting.currentdirectory': '#888888',
+    'pygments.directorylisting.parentdirectory': '#888888',
+    'pygments.directorylisting.tempfile':  '#888888',
+    'pygments.directorylisting.dotfile':  '#888888',
+    'pygments.directorylisting.pythonfile':  '#8800ff',
+    'pygments.directorylisting.textfile':  '#aaaa00',
 }
 
 
