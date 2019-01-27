@@ -39,7 +39,7 @@ class DirectoryListingLexer(RegexLexer):
     """
     name = 'directory-listing'
     tokens = {
-        'root': [
+        str('root'): [  # Conversion to `str` because of Pygments on Python 2.
             (r'^".*', _DirectoryListing.Header),
 
             (r'^\.\./$', _DirectoryListing.ParentDirectory),
