@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.document import Document
-from prompt_toolkit.eventloop import call_from_executor, run_in_executor
+from prompt_toolkit import __version__ as ptk_version
 
 from pyvim.completion import DocumentCompleter
 from pyvim.reporting import report
@@ -11,6 +11,13 @@ from six import string_types
 
 import os
 import weakref
+
+PTK3 = ptk_version.startswith('3.')
+
+if PTK3:
+    from asyncio import get_event_loop
+else:
+    from prompt_toolkit.eventloop import call_from_executor, run_in_executor
 
 __all__ = (
     'EditorBuffer',
@@ -180,6 +187,9 @@ class EditorBuffer(object):
             # Better not to access the document in an executor.
             document = self.buffer.document
 
+            if PTK3:
+                loop = get_event_loop()
+
             def in_executor():
                 # Call reporter
                 report_errors = report(self.location, document)
@@ -196,5 +206,12 @@ class EditorBuffer(object):
                         # Restart reporter when the text was changed.
                         self.run_reporter()
 
-                call_from_executor(ready)
-            run_in_executor(in_executor)
+                if PTK3:
+                    loop.call_soon_threadsafe(ready)
+                else:
+                    call_from_executor(ready)
+
+            if PTK3:
+                loop.run_in_executor(None, in_executor)
+            else:
+                run_in_executor(in_executor)
