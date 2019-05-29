@@ -103,6 +103,10 @@ class TabPage(object):
             if child == split:
                 return parent
 
+    def get_windows_for_buffer(self, editor_buffer):
+        """ Return a list of all windows in this tab page. """
+        return (window for _, window in self._walk_through_windows() if window.editor_buffer == editor_buffer)
+
     def _split(self, split_cls, editor_buffer=None):
         """
         Split horizontal or vertical.
@@ -259,6 +263,10 @@ class WindowArrangement(object):
         for eb in self.editor_buffers:
             if eb.buffer_name == buffer_name:
                 return eb
+
+    def get_windows_for_buffer(self, editor_buffer):
+        """ Return a list of all windows in this tab page. """
+        return (b for t in self.tab_pages for b in t.get_windows_for_buffer(editor_buffer))
 
     def close_window(self):
         """
