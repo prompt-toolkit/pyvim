@@ -358,7 +358,7 @@ def write_and_quit_all(editor):
         editor.show_message(_NO_FILE_NAME)
     else:
         eb.write()
-        quit(editor, all_=True, force=False)
+        quit_all(editor, force=False)
 
 
 @cmd('h')
