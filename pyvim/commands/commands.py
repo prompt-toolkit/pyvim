@@ -281,20 +281,18 @@ def buffer_edit(editor, location, force=False):
 
 @cmd('q', accepts_force=True)
 @cmd('quit', accepts_force=True)
-def quit(editor, all_=False, force=False):
+def quit(editor, force=False):
     """
     Quit.
     """
-    ebs = editor.window_arrangement.editor_buffers
-
-    # When there are buffers that have unsaved changes, show balloon.
-    if not force and any(eb.has_unsaved_changes for eb in ebs):
+    eb = editor.window_arrangement.active_editor_buffer
+    eb_is_open_in_another_window = len(list(editor.window_arrangement.get_windows_for_buffer(eb))) > 1
+    if not force and eb.has_unsaved_changes and not eb_is_open_in_another_window:
         editor.show_message(_NO_WRITE_SINCE_LAST_CHANGE_TEXT)
-
-    # When there is more than one buffer open.
-    elif not all_ and len(ebs) > 1:
-        editor.show_message('%i more files to edit' % (len(ebs) - 1))
-
+    elif editor.window_arrangement.active_tab.window_count() > 1:
+        editor.window_arrangement.close_window()
+    elif len(editor.window_arrangement.tab_pages) > 1:
+        editor.window_arrangement.close_tab()
     else:
         editor.application.exit()
 
