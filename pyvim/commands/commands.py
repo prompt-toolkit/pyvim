@@ -305,7 +305,11 @@ def quit_all(editor, force=False):
     """
     Quit all.
     """
-    quit(editor, all_=True, force=force)
+    ebs = editor.window_arrangement.editor_buffers
+    if not force and any(eb.has_unsaved_changes for eb in ebs):
+        editor.show_message(_NO_WRITE_SINCE_LAST_CHANGE_TEXT)
+    else:
+        editor.application.exit()
 
 
 @location_cmd('w', accepts_force=True)
