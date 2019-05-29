@@ -208,6 +208,8 @@ def buffer_add(editor, location):
     editor.window_arrangement.open_buffer(location)
 
 
+@cmd('files')
+@cmd('ls')
 @cmd('buffers')
 def buffer_list(editor):
     """
