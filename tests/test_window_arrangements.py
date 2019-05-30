@@ -19,34 +19,18 @@ def test_vsplit(editor, tab_page):
     assert len(tab_page.root) == 2
 
 
-def test_tab_page_get_windows_for_buffer(editor):
-    # Create new buffer.
-    eb1 = EditorBuffer(editor)
-    eb2 = EditorBuffer(editor)
+def test_tab_page_get_windows_for_buffer(editor, editor_buffer, tab_page_with_splits):
+    tab_page1 = tab_page_with_splits
 
-    # Insert in tab, by splitting.
-    tab_page1 = TabPage(Window(eb1))
-    tab_page1.vsplit(eb1)
-    tab_page1.vsplit(eb2)
-    tab_page1.hsplit(eb1)
-
-    windows = list(tab_page1.get_windows_for_buffer(eb1))
-    assert all(w.editor_buffer == eb1 for w in windows)
+    windows = list(tab_page1.get_windows_for_buffer(editor_buffer))
+    assert all(w.editor_buffer == editor_buffer for w in windows)
     assert len(windows) == 3
 
-def test_window_arrangement_get_windows_for_buffer(editor, window_arrangement):
-    # Create new buffer.
-    eb1 = EditorBuffer(editor)
-    eb2 = EditorBuffer(editor)
-
-    # Insert in tab, by splitting.
-    tab_page1 = TabPage(Window(eb1))
-    tab_page1.vsplit(eb1)
-    tab_page1.vsplit(eb2)
-    tab_page1.hsplit(eb1)
-    tab_page2 = TabPage(Window(eb1))
+def test_window_arrangement_get_windows_for_buffer(editor, editor_buffer, tab_page_with_splits, window_arrangement):
+    tab_page1 = tab_page_with_splits
+    tab_page2 = TabPage(Window(editor_buffer))
 
     window_arrangement.tab_pages[:] = [tab_page1, tab_page2]
-    windows = list(window_arrangement.get_windows_for_buffer(eb1))
-    assert all(w.editor_buffer == eb1 for w in windows)
+    windows = list(window_arrangement.get_windows_for_buffer(editor_buffer))
+    assert all(w.editor_buffer == editor_buffer for w in windows)
     assert len(windows) == 4
