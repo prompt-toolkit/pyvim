@@ -414,7 +414,7 @@ def pwd(editor):
 def cd(editor, location):
     " Change working directory. "
     try:
-        os.chdir(location)
+        os.chdir(os.path.expanduser(location))
     except OSError as e:
         editor.show_message('{}'.format(e))
 
