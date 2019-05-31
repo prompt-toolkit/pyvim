@@ -330,7 +330,7 @@ def write_and_quit(editor, location, force=False):
     Write file and quit.
     """
     write(editor, location, force=force)
-    editor.application.exit()
+    quit(editor)
 
 
 @cmd('cq')
