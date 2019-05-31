@@ -344,17 +344,26 @@ def quit_nonzero(editor):
     editor.application.exit()
 
 
+@cmd('wa')
+def write_all(editor):
+    """
+    Write all changed buffers
+    """
+    for eb in editor.window_arrangement.editor_buffers:
+        if eb.location is None:
+            editor.show_message(_NO_FILE_NAME)
+            break
+        else:
+            eb.write()
+
+
 @cmd('wqa')
 def write_and_quit_all(editor):
     """
-    Write current buffer and quit all.
+    Write all changed buffers and quit all.
     """
-    eb = editor.window_arrangement.active_editor_buffer
-    if eb.location is None:
-        editor.show_message(_NO_FILE_NAME)
-    else:
-        eb.write()
-        quit_all(editor, force=False)
+    write_all(editor)
+    quit_all(editor)
 
 
 @cmd('h')
