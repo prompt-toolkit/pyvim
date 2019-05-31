@@ -272,7 +272,10 @@ class WindowArrangement(object):
         """
         Close active window of active tab.
         """
-        self.active_tab.close_active_window()
+        if self.active_tab.window_count() > 1:
+            self.active_tab.close_active_window()
+        else:
+            self.close_tab()
 
         # Clean up buffers.
         self._auto_close_new_empty_buffers()

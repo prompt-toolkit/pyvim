@@ -289,12 +289,10 @@ def quit(editor, force=False):
     eb_is_open_in_another_window = len(list(editor.window_arrangement.get_windows_for_buffer(eb))) > 1
     if not force and eb.has_unsaved_changes and not eb_is_open_in_another_window:
         editor.show_message(_NO_WRITE_SINCE_LAST_CHANGE_TEXT)
-    elif editor.window_arrangement.active_tab.window_count() > 1:
-        editor.window_arrangement.close_window()
-    elif len(editor.window_arrangement.tab_pages) > 1:
-        editor.window_arrangement.close_tab()
-    else:
+    elif editor.window_arrangement.active_tab.window_count() == 1 and len(editor.window_arrangement.tab_pages) == 1:
         editor.application.exit()
+    else:
+        editor.window_arrangement.close_window()
 
 
 @cmd('qa', accepts_force=True)
