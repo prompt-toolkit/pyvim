@@ -48,6 +48,13 @@ def create_key_bindings(editor):
         write_and_quit(editor, None)
         editor.sync_with_prompt_toolkit()
 
+    @kb.add('c-z', filter=in_navigation_mode)
+    def _(event):
+        """
+        Suspend process to background.
+        """
+        event.app.suspend_to_background()
+
     @kb.add('c-t')
     def _(event):
         """
