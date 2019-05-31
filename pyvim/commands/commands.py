@@ -411,7 +411,7 @@ def pwd(editor):
 
 
 @location_cmd('cd', accepts_force=False)
-def pwd(editor, location):
+def cd(editor, location):
     " Change working directory. "
     try:
         os.chdir(location)
