@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from .grammar import COMMAND_GRAMMAR
-from .commands import call_command_handler, has_command_handler
+from .commands import call_command_handler, has_command_handler, substitute
 
 __all__ = (
     'handle_command',
@@ -21,6 +21,11 @@ def handle_command(editor, input_string):
     command = variables.get('command')
     go_to_line = variables.get('go_to_line')
     shell_command = variables.get('shell_command')
+    range_start = variables.get('range_start')
+    range_end = variables.get('range_end')
+    search = variables.get('search')
+    replace = variables.get('replace')
+    flags = variables.get('flags', '')
 
     # Call command handler.
 
@@ -35,6 +40,11 @@ def handle_command(editor, input_string):
     elif has_command_handler(command):
         # Handle other 'normal' commands.
         call_command_handler(command, editor, variables)
+
+    elif command in ('s', 'substitute'):
+        flags = flags.lstrip('/')
+        substitute(editor, range_start, range_end, search, replace, flags)
+
     else:
         # For unknown commands, show error message.
         editor.show_message('Not an editor command: %s' % input_string)
