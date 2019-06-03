@@ -1,6 +1,9 @@
 from __future__ import unicode_literals, print_function
 from prompt_toolkit.application import run_in_terminal
+from prompt_toolkit.document import Document
+
 import os
+import re
 import six
 
 __all__ = (
@@ -704,3 +707,26 @@ def set_scroll_offset(editor, value):
             'Invalid value. Expecting comma separated list of integers')
     else:
         editor.colorcolumn = numbers
+
+
+def substitute(editor, range_start, range_end, search, replace, flags):
+    if flags == 'g':
+        transform_callback = lambda s: re.sub(search, replace, s)
+    else:
+        transform_callback = lambda s: re.sub(search, replace, s, count=1)
+
+    buffer = editor.current_editor_buffer.buffer
+    current_row = buffer.document.cursor_position_row
+
+    if not range_end:
+        range_end = range_start
+    if range_start and range_end:
+        line_index_iterator = range(int(range_start) - 1, int(range_end))
+    else:
+        line_index_iterator = range(current_row, current_row + 1)
+
+    new_text = buffer.transform_lines(line_index_iterator, transform_callback)
+    buffer.document = Document(
+        new_text,
+        Document(new_text).translate_row_col_to_index(current_row, 0))
+    buffer.cursor_position += buffer.document.get_start_of_line_position(after_whitespace=True)
