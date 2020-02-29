@@ -41,9 +41,8 @@ def test_substitute_single_line(editor, editor_buffer):
     assert 'Roses are red,' in editor_buffer.buffer.text
     assert 'Violet is blue,' in editor_buffer.buffer.text
     assert 'And so are you.' in editor_buffer.buffer.text
-    # FIXME: vim would have set the cursor position on the substituted line
-    # assert editor_buffer.buffer.cursor_position \
-    #    == editor_buffer.buffer.text.index('Violet')
+    assert editor_buffer.buffer.cursor_position \
+        == editor_buffer.buffer.text.index('Violet')
 
 
 def test_substitute_range(editor, editor_buffer):
