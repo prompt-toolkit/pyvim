@@ -719,6 +719,7 @@ def substitute(editor, range_start, range_end, search, replace, flags):
     current_row = buffer.document.cursor_position_row
 
     if not range_end:
+        current_row = (int(range_start) - 1) if range_start else current_row
         range_end = range_start
     if range_start and range_end:
         line_index_iterator = range(int(range_start) - 1, int(range_end))
