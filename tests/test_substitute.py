@@ -1,0 +1,60 @@
+from pyvim.commands.handler import handle_command
+
+sample_text = """
+Roses are red,
+    Violets are blue,
+Sugar is sweet,
+    And so are you.
+""".lstrip()
+
+def given_sample_text(editor_buffer):
+    editor = editor_buffer.editor
+    editor.window_arrangement._add_editor_buffer(editor_buffer)
+    editor_buffer.buffer.text = sample_text
+    editor.sync_with_prompt_toolkit()
+
+
+def given_cursor_position(editor_buffer, line_number, column=0):
+    editor_buffer.buffer.cursor_position = \
+        editor_buffer.buffer.document.translate_row_col_to_index(line_number - 1, column)
+
+
+def test_substitute_current_line(editor, editor_buffer):
+    given_sample_text(editor_buffer)
+    given_cursor_position(editor_buffer, 2)
+
+    handle_command(editor, ':s/s are/ is')
+
+    assert 'Roses are red,' in editor_buffer.buffer.text
+    assert 'Violet is blue,' in editor_buffer.buffer.text
+    assert 'And so are you.' in editor_buffer.buffer.text
+    assert editor_buffer.buffer.cursor_position \
+        == editor_buffer.buffer.text.index('Violet')
+
+
+def test_substitute_single_line(editor, editor_buffer):
+    given_sample_text(editor_buffer)
+    given_cursor_position(editor_buffer, 1)
+
+    handle_command(editor, ':2s/s are/ is')
+
+    assert 'Roses are red,' in editor_buffer.buffer.text
+    assert 'Violet is blue,' in editor_buffer.buffer.text
+    assert 'And so are you.' in editor_buffer.buffer.text
+    # FIXME: vim would have set the cursor position on the substituted line
+    # assert editor_buffer.buffer.cursor_position \
+    #    == editor_buffer.buffer.text.index('Violet')
+
+
+def test_substitute_range(editor, editor_buffer):
+    given_sample_text(editor_buffer)
+    given_cursor_position(editor_buffer, 1)
+
+    handle_command(editor, ':1,3s/s are/ is')
+
+    assert 'Rose is red,' in editor_buffer.buffer.text
+    assert 'Violet is blue,' in editor_buffer.buffer.text
+    assert 'And so are you.' in editor_buffer.buffer.text
+    # FIXME: vim would have set the cursor position on last substituted line
+    # assert editor_buffer.buffer.cursor_position \
+    #    == editor_buffer.buffer.text.index('Violet')
