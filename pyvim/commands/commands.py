@@ -710,34 +710,46 @@ def set_scroll_offset(editor, value):
 
 
 def substitute(editor, range_start, range_end, search, replace, flags):
+    def get_line_index_iterator(cursor_position_row, range_start, range_end):
+        if not range_start:
+            range_start = range_end = cursor_position_row
+        else:
+            range_start = int(range_start) - 1
+            if not range_end:
+                range_end = range_start
+            range_end = int(range_end)
+        return range(range_start, range_end + 1)
+
+    def get_transform_callback(search, replace, flags):
+        SUBSTITUTE_ALL, SUBSTITUTE_ONE = 0, 1
+        sub_count = SUBSTITUTE_ALL if 'g' in flags else SUBSTITUTE_ONE
+        return lambda s: re.sub(search, replace, s, count=sub_count)
+
+    search_state = editor.application.current_search_state
+    buffer = editor.current_editor_buffer.buffer
+    cursor_position_row = buffer.document.cursor_position_row
+
+    # read editor state
+    if not search:
+        search = search_state.text
+
     if editor.last_substitute_text and replace is None:
         replace = editor.last_substitute_text
-    else:
-        editor.last_substitute_text = replace
 
-    if not search:
-        search = editor.application.current_search_state.text
-    else:
-        editor.application.current_search_state.text = search
-
-    if flags == 'g':
-        transform_callback = lambda s: re.sub(search, replace, s)
-    else:
-        transform_callback = lambda s: re.sub(search, replace, s, count=1)
-
-    buffer = editor.current_editor_buffer.buffer
-    current_row = buffer.document.cursor_position_row
-
-    if not range_end:
-        current_row = (int(range_start) - 1) if range_start else current_row
-        range_end = range_start
-    if range_start and range_end:
-        line_index_iterator = range(int(range_start) - 1, int(range_end))
-    else:
-        line_index_iterator = range(current_row, current_row + 1)
-
+    line_index_iterator = get_line_index_iterator(cursor_position_row, range_start, range_end)
+    transform_callback = get_transform_callback(search, replace, flags)
     new_text = buffer.transform_lines(line_index_iterator, transform_callback)
+
+    new_cursor_position_row = int(range_start) - 1 if range_start and not range_end else cursor_position_row
+
+    # update text buffer
     buffer.document = Document(
         new_text,
-        Document(new_text).translate_row_col_to_index(current_row, 0))
+        Document(new_text).translate_row_col_to_index(new_cursor_position_row, 0),
+    )
     buffer.cursor_position += buffer.document.get_start_of_line_position(after_whitespace=True)
+    buffer._search(search_state, include_current_position=True)
+
+    # update editor state
+    editor.last_substitute_text = replace
+    search_state.text = search
