@@ -7,10 +7,10 @@ Sugar is sweet,
     And so are you.
 """.lstrip()
 
-def given_sample_text(editor_buffer):
+def given_sample_text(editor_buffer, text=None):
     editor = editor_buffer.editor
     editor.window_arrangement._add_editor_buffer(editor_buffer)
-    editor_buffer.buffer.text = sample_text
+    editor_buffer.buffer.text = text or sample_text
     editor.sync_with_prompt_toolkit()
 
 
@@ -65,3 +65,14 @@ def test_substitute_from_search_history(editor, editor_buffer):
 
     handle_command(editor, ':1,3s//pretty')
     assert 'Violets are pretty,' in editor_buffer.buffer.text
+
+
+def test_substitute_flags_empty_flags(editor, editor_buffer):
+    given_sample_text(editor_buffer, 'Violet is Violet\n')
+    handle_command(editor, ':s/Violet/Rose/')
+    assert 'Rose is Violet' in editor_buffer.buffer.text
+
+def test_substitute_flags_g(editor, editor_buffer):
+    given_sample_text(editor_buffer, 'Rose is Violet\n')
+    handle_command(editor, ':s/Violet/Rose/g')
+    assert 'Rose is Rose' in editor_buffer.buffer.text
