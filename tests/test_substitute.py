@@ -80,7 +80,7 @@ def test_substitute_from_search_history(editor, editor_buffer):
 
 
 def test_substitute_from_substitute_search_history(editor, editor_buffer):
-    given_sample_text(editor_buffer, 'Violet is Violet')
+    given_sample_text(editor_buffer, 'Violet is Violet\n')
 
     handle_command(editor, ':s/Violet/Rose')
     assert 'Rose is Violet' in editor_buffer.buffer.text
@@ -100,6 +100,20 @@ def test_substitute_with_repeat_last_substitution(editor, editor_buffer):
     assert 'Rose is Rose' in editor_buffer.buffer.text
 
 
+def test_substitute_without_replacement_text(editor, editor_buffer):
+    given_sample_text(editor_buffer, 'Violet Violet Violet \n')
+    editor.application.current_search_state.text = 'Lily'
+
+    handle_command(editor, ':s/Violet/')
+    assert ' Violet Violet \n' in editor_buffer.buffer.text
+
+    handle_command(editor, ':s/Violet')
+    assert '  Violet \n' in editor_buffer.buffer.text
+
+    handle_command(editor, ':s/')
+    assert '   \n' in editor_buffer.buffer.text
+
+
 def test_substitute_with_repeat_last_substitution_without_previous_substitution(editor, editor_buffer):
     original_text = 'Violet is blue\n'
     given_sample_text(editor_buffer, original_text)
@@ -117,6 +131,7 @@ def test_substitute_flags_empty_flags(editor, editor_buffer):
     given_sample_text(editor_buffer, 'Violet is Violet\n')
     handle_command(editor, ':s/Violet/Rose/')
     assert 'Rose is Violet' in editor_buffer.buffer.text
+
 
 def test_substitute_flags_g(editor, editor_buffer):
     given_sample_text(editor_buffer, 'Violet is Violet\n')
