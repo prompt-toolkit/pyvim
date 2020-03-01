@@ -94,6 +94,6 @@ def test_substitute_flags_empty_flags(editor, editor_buffer):
     assert 'Rose is Violet' in editor_buffer.buffer.text
 
 def test_substitute_flags_g(editor, editor_buffer):
-    given_sample_text(editor_buffer, 'Rose is Violet\n')
+    given_sample_text(editor_buffer, 'Violet is Violet\n')
     handle_command(editor, ':s/Violet/Rose/g')
     assert 'Rose is Rose' in editor_buffer.buffer.text
