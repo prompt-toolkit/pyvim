@@ -88,6 +88,19 @@ def test_substitute_with_repeat_last_substitution(editor, editor_buffer):
     assert 'Rose is Rose' in editor_buffer.buffer.text
 
 
+def test_substitute_with_repeat_last_substitution_without_previous_substitution(editor, editor_buffer):
+    original_text = 'Violet is blue\n'
+    given_sample_text(editor_buffer, original_text)
+
+    handle_command(editor, ':s')
+    assert original_text in editor_buffer.buffer.text
+
+    editor.application.current_search_state.text = 'blue'
+
+    handle_command(editor, ':s')
+    assert 'Violet is \n' in editor_buffer.buffer.text
+
+
 def test_substitute_flags_empty_flags(editor, editor_buffer):
     given_sample_text(editor_buffer, 'Violet is Violet\n')
     handle_command(editor, ':s/Violet/Rose/')
