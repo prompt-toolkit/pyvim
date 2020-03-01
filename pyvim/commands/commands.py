@@ -734,7 +734,7 @@ def substitute(editor, range_start, range_end, search, replace, flags):
     if not search:
         search = search_state.text
 
-    if editor.last_substitute_text and replace is None:
+    if replace is None:
         replace = editor.last_substitute_text
 
     line_index_iterator = get_line_index_iterator(cursor_position_row, range_start, range_end)
