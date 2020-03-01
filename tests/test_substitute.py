@@ -57,3 +57,11 @@ def test_substitute_range(editor, editor_buffer):
     # FIXME: vim would have set the cursor position on last substituted line
     # assert editor_buffer.buffer.cursor_position \
     #    == editor_buffer.buffer.text.index('Violet')
+
+
+def test_substitute_from_search_history(editor, editor_buffer):
+    given_sample_text(editor_buffer)
+    editor.application.current_search_state.text = 'blue'
+
+    handle_command(editor, ':1,3s//pretty')
+    assert 'Violets are pretty,' in editor_buffer.buffer.text
