@@ -12,7 +12,7 @@ COMMAND_GRAMMAR = compile(r"""
     \s*
     (
         # Substitute command
-        ((?P<range_start>\d+)(,(?P<range_end>\d+))?)?  (?P<command>s|substitute) \s* / (?P<search>[^/]*) / (?P<replace>[^/]*) (?P<flags> /g )?    |
+        ((?P<range_start>\d+)(,(?P<range_end>\d+))?)?  (?P<command>s|substitute) \s* / (?P<search>[^/]*) / (?P<replace>[^/]*) (?P<flags> /(g)? )?    |
 
         # Commands accepting a location.
         (?P<command>%(commands_taking_locations)s)(?P<force>!?)  \s+   (?P<location>[^\s]+)   |
