@@ -710,6 +710,7 @@ def set_scroll_offset(editor, value):
 
 
 def substitute(editor, range_start, range_end, search, replace, flags):
+    """ Substitute /search/ with /replace/ over a range of text """
     def get_line_index_iterator(cursor_position_row, range_start, range_end):
         if not range_start:
             range_start = range_end = cursor_position_row
