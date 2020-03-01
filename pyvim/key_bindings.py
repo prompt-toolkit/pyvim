@@ -4,7 +4,7 @@ from prompt_toolkit.application import get_app
 from prompt_toolkit.filters import Condition, has_focus, vi_insert_mode, vi_navigation_mode
 from prompt_toolkit.key_binding import KeyBindings
 
-from .commands.commands import write_and_quit
+from .commands.commands import write_and_quit, quit
 
 import os
 
@@ -46,6 +46,14 @@ def create_key_bindings(editor):
         Write and quit.
         """
         write_and_quit(editor, None)
+        editor.sync_with_prompt_toolkit()
+
+    @kb.add('Z', 'Q', filter=in_navigation_mode)
+    def _(event):
+        """
+        Quit and discard changes.
+        """
+        quit(editor, force=True)
         editor.sync_with_prompt_toolkit()
 
     @kb.add('c-z', filter=in_navigation_mode)
