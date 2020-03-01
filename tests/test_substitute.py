@@ -67,6 +67,17 @@ def test_substitute_from_search_history(editor, editor_buffer):
     assert 'Violets are pretty,' in editor_buffer.buffer.text
 
 
+def test_substitute_with_repeat_last_substitution(editor, editor_buffer):
+    given_sample_text(editor_buffer, 'Violet is Violet\n')
+    editor.application.current_search_state.text = 'Lily'
+
+    handle_command(editor, ':s/Violet/Rose')
+    assert 'Rose is Violet' in editor_buffer.buffer.text
+
+    handle_command(editor, ':s')
+    assert 'Rose is Rose' in editor_buffer.buffer.text
+
+
 def test_substitute_flags_empty_flags(editor, editor_buffer):
     given_sample_text(editor_buffer, 'Violet is Violet\n')
     handle_command(editor, ':s/Violet/Rose/')

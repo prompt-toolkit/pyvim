@@ -129,6 +129,8 @@ class Editor(object):
         # Command line previewer.
         self.previewer = CommandPreviewer(self)
 
+        self.last_substitute_text = ''
+
     def load_initial_files(self, locations, in_tab_pages=False, hsplit=False, vsplit=False):
         """
         Load a list of files.

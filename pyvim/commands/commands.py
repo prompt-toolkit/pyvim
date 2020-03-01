@@ -710,8 +710,16 @@ def set_scroll_offset(editor, value):
 
 
 def substitute(editor, range_start, range_end, search, replace, flags):
+    if editor.last_substitute_text and replace is None:
+        replace = editor.last_substitute_text
+    else:
+        editor.last_substitute_text = replace
+
     if not search:
         search = editor.application.current_search_state.text
+    else:
+        editor.application.current_search_state.text = search
+
     if flags == 'g':
         transform_callback = lambda s: re.sub(search, replace, s)
     else:
