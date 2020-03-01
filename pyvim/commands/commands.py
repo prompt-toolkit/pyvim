@@ -716,9 +716,7 @@ def substitute(editor, range_start, range_end, search, replace, flags):
             range_start = range_end = cursor_position_row
         else:
             range_start = int(range_start) - 1
-            if not range_end:
-                range_end = range_start
-            range_end = int(range_end)
+            range_end = int(range_end) - 1 if range_end else range_start
         return range(range_start, range_end + 1)
 
     def get_transform_callback(search, replace, flags):

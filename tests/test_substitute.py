@@ -59,6 +59,14 @@ def test_substitute_range(editor, editor_buffer):
     #    == editor_buffer.buffer.text.index('Violet')
 
 
+def test_substitute_range_boundaries(editor, editor_buffer):
+    given_sample_text(editor_buffer, 'Violet\n' * 4)
+
+    handle_command(editor, ':2,3s/Violet/Rose')
+
+    assert 'Violet\nRose\nRose\nViolet\n' in editor_buffer.buffer.text
+
+
 def test_substitute_from_search_history(editor, editor_buffer):
     given_sample_text(editor_buffer)
     editor.application.current_search_state.text = 'blue'
