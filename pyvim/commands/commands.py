@@ -713,6 +713,7 @@ def substitute(editor, range_start, range_end, search, replace, flags):
     """ Substitute /search/ with /replace/ over a range of text """
     def get_line_index_iterator(cursor_position_row, range_start, range_end):
         if not range_start:
+            assert not range_end
             range_start = range_end = cursor_position_row
         else:
             range_start = int(range_start) - 1
@@ -739,7 +740,8 @@ def substitute(editor, range_start, range_end, search, replace, flags):
     transform_callback = get_transform_callback(search, replace, flags)
     new_text = buffer.transform_lines(line_index_iterator, transform_callback)
 
-    new_cursor_position_row = int(range_start) - 1 if range_start and not range_end else cursor_position_row
+    assert len(line_index_iterator) >= 1
+    new_cursor_position_row = line_index_iterator[-1]
 
     # update text buffer
     buffer.document = Document(

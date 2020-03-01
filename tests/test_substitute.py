@@ -55,8 +55,12 @@ def test_substitute_range(editor, editor_buffer):
     assert 'Violet is blue,' in editor_buffer.buffer.text
     assert 'And so are you.' in editor_buffer.buffer.text
     # FIXME: vim would have set the cursor position on last substituted line
+    #        but we set the cursor position on the end_range even when there
+    #        is not substitution there
     # assert editor_buffer.buffer.cursor_position \
     #    == editor_buffer.buffer.text.index('Violet')
+    assert editor_buffer.buffer.cursor_position \
+        == editor_buffer.buffer.text.index('Sugar')
 
 
 def test_substitute_range_boundaries(editor, editor_buffer):
