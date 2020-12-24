@@ -528,7 +528,7 @@ class EditorLayout(object):
 
     def _create_window_frame(self, editor_buffer):
         """
-        Create a Window for the buffer, with underneat a status bar.
+        Create a Window for the buffer, with underneath a status bar.
         """
         @Condition
         def wrap_lines():
