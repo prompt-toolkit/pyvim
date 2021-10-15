@@ -2,6 +2,7 @@
 """
 Pyvim configuration. Save to file to: ~/.pyvimrc
 """
+from prompt_toolkit.application import run_in_terminal
 from prompt_toolkit.filters import ViInsertMode
 from prompt_toolkit.key_binding.key_processor import KeyPress
 from prompt_toolkit.keys import Keys
@@ -64,7 +65,7 @@ def configure(editor):
         editor_buffer = editor.current_editor_buffer
 
         if editor_buffer is not None:
-            if editor_buffer.filename is None:
+            if editor_buffer.location is None:
                 editor.show_message("File doesn't have a filename. Please save first.")
                 return
             else:
@@ -74,7 +75,7 @@ def configure(editor):
         # `CommandLineInterface.run_in_terminal` to go to the background and
         # not destroy the window layout.
         def execute():
-            call(['python', editor_buffer.filename])
+            call(['python3', editor_buffer.location])
             six.moves.input('Press enter to continue...')
 
-        editor.cli.run_in_terminal(execute)
+        run_in_terminal(execute)
