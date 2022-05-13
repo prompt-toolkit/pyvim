@@ -11,7 +11,7 @@ setup(
     name='pyvim',
     author='Jonathan Slenders',
     version=pyvim.__version__,
-    license='LICENSE',
+    license='BSD License',
     url='https://github.com/jonathanslenders/pyvim',
     description='Pure Python Vi Implementation',
     long_description=long_description,
