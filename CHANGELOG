@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+3.0.3: 2022-05-16
+-----------------
+
+- Implemented basic :s[ubstitute] command and various related fixes.
+- Fixed license text in setup.py.
+
+
 3.0.2: 2019-11-28
 ------------------
 
