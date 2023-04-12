@@ -115,6 +115,6 @@ class _PythonCompleter(Completer):
             # Workaround Jedi issue #514: for https://github.com/davidhalter/jedi/issues/514
             return None
         except KeyError:
-            # Workaroud for a crash when the input is "u'", the start of a unicode string.
+            # Workaround for a crash when the input is "u'", the start of a unicode string.
             return None
 
