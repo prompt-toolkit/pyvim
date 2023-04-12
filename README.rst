@@ -50,7 +50,7 @@ We have already many nice things, for instance:
 - All of the functionality of `prompt_toolkit
   <http://github.com/jonathanslenders/python-prompt-toolkit>`_. This includes a
   lot of Vi key bindings, it's platform independent and runs on every Python
-  version from python 2.6 up to 3.4. It also runs on Pypy with a noticable
+  version from python 2.6 up to 3.4. It also runs on Pypy with a noticeable
   performance boost.
 
 - Several ``:set ...`` commands have been implemented, like ``incsearch``,
@@ -121,7 +121,7 @@ Compared to Vi Improved, Pyvim is still less powerful in many aspects.
   well for development and quickly prototyping of new features, but it comes
   with a performance penalty. Depending on the system, when a file has above a
   thousand lines and syntax highlighting is enabled, editing will become
-  noticable slower. (The bottleneck is probably the ``BufferControl`` code,
+  noticeable slower. (The bottleneck is probably the ``BufferControl`` code,
   which on every key press tries to reflow the text and calls pygments for
   highlighting. And this is Python code looping through single characters.)
 - A lot of nice Vim features, like line folding, macros, etcetera are not yet

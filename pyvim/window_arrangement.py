@@ -183,7 +183,7 @@ class TabPage(object):
             self.active_window = None  # No windows left.
 
         # When there is exactly on item left, move this back into the parent
-        # split. (We don't want to keep a split with one item around -- exept
+        # split. (We don't want to keep a split with one item around -- except
         # for the root.)
         if len(active_split) == 1 and active_split != self.root:
             parent = self._get_split_parent(active_split)

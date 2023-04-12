@@ -341,7 +341,7 @@ def quit_nonzero(editor):
     """
     # Note: the try/finally in `prompt_toolkit.Interface.read_input`
     # will ensure that the render output is reset, leaving the alternate
-    # screen before quiting.
+    # screen before quitting.
     editor.application.exit()
 
 
