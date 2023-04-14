@@ -4,6 +4,8 @@ from prompt_toolkit.application import get_app
 from prompt_toolkit.filters import Condition, has_focus, vi_insert_mode, vi_navigation_mode
 from prompt_toolkit.key_binding import KeyBindings
 
+from .commands.commands import write_and_quit, quit
+
 import os
 
 __all__ = (
@@ -38,6 +40,29 @@ def create_key_bindings(editor):
     in_insert_mode = vi_insert_mode & vi_buffer_focussed
     in_navigation_mode = vi_navigation_mode & vi_buffer_focussed
 
+    @kb.add('Z', 'Z', filter=in_navigation_mode)
+    def _(event):
+        """
+        Write and quit.
+        """
+        write_and_quit(editor, None)
+        editor.sync_with_prompt_toolkit()
+
+    @kb.add('Z', 'Q', filter=in_navigation_mode)
+    def _(event):
+        """
+        Quit and discard changes.
+        """
+        quit(editor, force=True)
+        editor.sync_with_prompt_toolkit()
+
+    @kb.add('c-z', filter=in_navigation_mode)
+    def _(event):
+        """
+        Suspend process to background.
+        """
+        event.app.suspend_to_background()
+
     @kb.add('c-t')
     def _(event):
         """
@@ -52,7 +77,7 @@ def create_key_bindings(editor):
         """
         Indent current line.
         """
-        b = event.application.current_buffer
+        b = event.app.current_buffer
 
         # Move to start of line.
         pos = b.document.get_start_of_line_position(after_whitespace=True)

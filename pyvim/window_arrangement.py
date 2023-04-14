@@ -22,7 +22,7 @@ class HSplit(list):
 
 
 class VSplit(list):
-    """ Horizontal split. """
+    """ Vertical split. """
 
 
 class Window(object):
@@ -102,6 +102,10 @@ class TabPage(object):
         for parent, child in self._walk_through_splits():
             if child == split:
                 return parent
+
+    def get_windows_for_buffer(self, editor_buffer):
+        """ Return a list of all windows in this tab page. """
+        return (window for _, window in self._walk_through_windows() if window.editor_buffer == editor_buffer)
 
     def _split(self, split_cls, editor_buffer=None):
         """
@@ -260,11 +264,18 @@ class WindowArrangement(object):
             if eb.buffer_name == buffer_name:
                 return eb
 
+    def get_windows_for_buffer(self, editor_buffer):
+        """ Return a list of all windows in this tab page. """
+        return (b for t in self.tab_pages for b in t.get_windows_for_buffer(editor_buffer))
+
     def close_window(self):
         """
         Close active window of active tab.
         """
-        self.active_tab.close_active_window()
+        if self.active_tab.window_count() > 1:
+            self.active_tab.close_active_window()
+        else:
+            self.close_tab()
 
         # Clean up buffers.
         self._auto_close_new_empty_buffers()

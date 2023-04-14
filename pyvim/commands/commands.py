@@ -211,6 +211,8 @@ def buffer_add(editor, location):
     editor.window_arrangement.open_buffer(location)
 
 
+@cmd('files')
+@cmd('ls')
 @cmd('buffers')
 def buffer_list(editor):
     """
@@ -282,22 +284,18 @@ def buffer_edit(editor, location, force=False):
 
 @cmd('q', accepts_force=True)
 @cmd('quit', accepts_force=True)
-def quit(editor, all_=False, force=False):
+def quit(editor, force=False):
     """
     Quit.
     """
-    ebs = editor.window_arrangement.editor_buffers
-
-    # When there are buffers that have unsaved changes, show balloon.
-    if not force and any(eb.has_unsaved_changes for eb in ebs):
+    eb = editor.window_arrangement.active_editor_buffer
+    eb_is_open_in_another_window = len(list(editor.window_arrangement.get_windows_for_buffer(eb))) > 1
+    if not force and eb.has_unsaved_changes and not eb_is_open_in_another_window:
         editor.show_message(_NO_WRITE_SINCE_LAST_CHANGE_TEXT)
-
-    # When there is more than one buffer open.
-    elif not all_ and len(ebs) > 1:
-        editor.show_message('%i more files to edit' % (len(ebs) - 1))
-
-    else:
+    elif editor.window_arrangement.active_tab.window_count() == 1 and len(editor.window_arrangement.tab_pages) == 1:
         editor.application.exit()
+    else:
+        editor.window_arrangement.close_window()
 
 
 @cmd('qa', accepts_force=True)
@@ -306,7 +304,11 @@ def quit_all(editor, force=False):
     """
     Quit all.
     """
-    quit(editor, all_=True, force=force)
+    ebs = editor.window_arrangement.editor_buffers
+    if not force and any(eb.has_unsaved_changes for eb in ebs):
+        editor.show_message(_NO_WRITE_SINCE_LAST_CHANGE_TEXT)
+    else:
+        editor.application.exit()
 
 
 @location_cmd('w', accepts_force=True)
@@ -331,7 +333,7 @@ def write_and_quit(editor, location, force=False):
     Write file and quit.
     """
     write(editor, location, force=force)
-    editor.application.exit()
+    quit(editor)
 
 
 @cmd('cq')
@@ -345,17 +347,26 @@ def quit_nonzero(editor):
     editor.application.exit()
 
 
+@cmd('wa')
+def write_all(editor):
+    """
+    Write all changed buffers
+    """
+    for eb in editor.window_arrangement.editor_buffers:
+        if eb.location is None:
+            editor.show_message(_NO_FILE_NAME)
+            break
+        else:
+            eb.write()
+
+
 @cmd('wqa')
 def write_and_quit_all(editor):
     """
-    Write current buffer and quit all.
+    Write all changed buffers and quit all.
     """
-    eb = editor.window_arrangement.active_editor_buffer
-    if eb.location is None:
-        editor.show_message(_NO_FILE_NAME)
-    else:
-        eb.write()
-        quit(editor, all_=True, force=False)
+    write_all(editor)
+    quit_all(editor)
 
 
 @cmd('h')
@@ -412,10 +423,10 @@ def pwd(editor):
 
 
 @location_cmd('cd', accepts_force=False)
-def pwd(editor, location):
+def cd(editor, location):
     " Change working directory. "
     try:
-        os.chdir(location)
+        os.chdir(os.path.expanduser(location))
     except OSError as e:
         editor.show_message('{}'.format(e))
 
