@@ -18,3 +18,4 @@ def test_vsplit(editor, tab_page):
 
     assert isinstance(tab_page.root, VSplit)
     assert len(tab_page.root) == 2
+#thanks for code bro😀
