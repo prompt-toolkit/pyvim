@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 from .grammar import COMMAND_GRAMMAR
 from .commands import call_command_handler, has_command_handler, substitute
 
+import asyncio
+
 __all__ = (
     'handle_command',
 )
@@ -35,7 +37,8 @@ def handle_command(editor, input_string):
 
     elif shell_command is not None:
         # Handle shell commands.
-        editor.application.run_system_command(shell_command)
+        loop = asyncio.get_event_loop()
+        loop.create_task(editor.application.run_system_command(shell_command))
 
     elif has_command_handler(command):
         # Handle other 'normal' commands.
