@@ -13,7 +13,7 @@ __all__ = (
 
 def _current_window_for_event(event):
     """
-    Return the `Window` for the currently focussed Buffer.
+    Return the `Window` for the currently focused Buffer.
     """
     return event.app.layout.current_window
 
@@ -29,14 +29,14 @@ def create_key_bindings(editor):
 
     # Filters.
     @Condition
-    def vi_buffer_focussed():
+    def vi_buffer_focused():
         app = get_app()
         if app.layout.has_focus(editor.search_buffer) or app.layout.has_focus(editor.command_buffer):
             return False
         return True
 
-    in_insert_mode = vi_insert_mode & vi_buffer_focussed
-    in_navigation_mode = vi_navigation_mode & vi_buffer_focussed
+    in_insert_mode = vi_insert_mode & vi_buffer_focused
+    in_navigation_mode = vi_navigation_mode & vi_buffer_focused
 
     @kb.add('c-t')
     def _(event):
